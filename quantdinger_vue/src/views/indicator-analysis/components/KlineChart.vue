@@ -1504,7 +1504,12 @@ registerOverlay({
           if (response.code === 1 && response.data && Array.isArray(response.data)) {
             formattedData = formatKlineData(response.data)
           } else {
-            throw new Error(response.msg || '获取K线数据失败')
+            // 特殊处理 Tiingo 订阅限制提示
+            let errMsg = response.msg || '获取K线数据失败'
+            if (response.hint === 'tiingo_subscription') {
+              errMsg = proxy.$t('dashboard.indicator.error.tiingoSubscription') || 'Forex 1-minute data requires Tiingo paid subscription'
+            }
+            throw new Error(errMsg)
           }
         } catch (apiErr) {
           throw apiErr

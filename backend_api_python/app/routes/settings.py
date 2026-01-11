@@ -317,7 +317,7 @@ CONFIG_SCHEMA = {
                 'required': False,
                 'link': 'https://www.tiingo.com/account/api/token',
                 'link_text': 'settings.link.getToken',
-                'description': 'Tiingo API key for US stock data (free tier available)'
+                'description': 'Tiingo API key for Forex/Metals data (free tier does not support 1-minute data)'
             },
             {
                 'key': 'TIINGO_TIMEOUT',

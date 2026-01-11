@@ -527,6 +527,7 @@ const locale = {
   'dashboard.indicator.error.pleaseLogin': 'Please login first',
   'dashboard.indicator.error.loadDataFailed': 'Failed to load data',
   'dashboard.indicator.error.loadDataFailedDesc': 'Please check network connection',
+  'dashboard.indicator.error.tiingoSubscription': 'Forex 1-minute data requires Tiingo paid subscription. Please use other timeframes or upgrade your subscription.',
   'dashboard.indicator.error.pythonEngineFailed': 'Python engine failed to load, indicator functionality may be unavailable',
   'dashboard.indicator.error.chartInitFailed': 'Chart initialization failed',
   'dashboard.indicator.warning.enterCode': 'Please enter indicator code first',
@@ -2046,7 +2047,9 @@ const locale = {
   // Note: These are optional since backend already provides English descriptions
   'settings.desc.ORDER_MODE': 'maker: Limit order first (lower fees), market: Market order (instant fill)',
   'settings.desc.MAKER_WAIT_SEC': 'Wait time for limit order fill before switching to market order',
-  'settings.desc.MAKER_OFFSET_BPS': 'Price offset in basis points. Buy: price*(1-offset), Sell: price*(1+offset)'
+  'settings.desc.MAKER_OFFSET_BPS': 'Price offset in basis points. Buy: price*(1-offset), Sell: price*(1+offset)',
+  'settings.desc.TIINGO_API_KEY': 'Tiingo API key for Forex/Metals data (free tier does not support 1-minute data)',
+  'settings.desc.TIINGO_TIMEOUT': 'Tiingo API request timeout'
 }
 
 export default {

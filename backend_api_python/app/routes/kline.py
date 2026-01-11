@@ -60,10 +60,17 @@ def get_kline():
         )
         
         if not klines:
+            # 针对特定情况给出更详细的提示
+            msg = 'No data found'
+            if market == 'Forex' and timeframe == '1m':
+                msg = 'Forex 1-minute data requires Tiingo paid subscription'
+            elif market == 'Forex' and timeframe in ('1W', '1M'):
+                msg = 'No weekly/monthly data available for this period'
             return jsonify({
                 'code': 0,
-                'msg': 'No data found',
-                'data': []
+                'msg': msg,
+                'data': [],
+                'hint': 'tiingo_subscription' if (market == 'Forex' and timeframe == '1m') else None
             })
         
         return jsonify({

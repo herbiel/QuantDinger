@@ -20,17 +20,18 @@ class ForexDataSource(BaseDataSource):
     name = "Forex/Tiingo"
     
     # Tiingo resampleFreq 映射
-    # Tiingo 支持: 1min, 5min, 15min, 30min, 1hour, 4hour, 1day 等
+    # Tiingo 免费账户支持: 5min, 15min, 30min, 1hour, 4hour, 1day
+    # 注意: 1min 需要付费订阅, 1week/1month 不被 Tiingo FX API 支持
     TIMEFRAME_MAP = {
-        '1m': '1min',
+        '1m': '1min',      # 需要付费订阅
         '5m': '5min',
         '15m': '15min',
         '30m': '30min',
         '1H': '1hour',
         '4H': '4hour',
         '1D': '1day',
-        '1W': '1week',
-        '1M': '1month'
+        '1W': None,        # Tiingo 不支持，需要聚合
+        '1M': None         # Tiingo 不支持，需要聚合
     }
     
     # 外汇对映射 (Tiingo 使用标准 ticker，如 eurusd, audusd)
@@ -89,9 +90,30 @@ class ForexDataSource(BaseDataSource):
 
             # 2. 解析 Resolution (resampleFreq)
             resample_freq = self.TIMEFRAME_MAP.get(timeframe)
+            
+            # 特殊处理：1W/1M 需要用日线聚合
+            aggregate_to_weekly = (timeframe == '1W')
+            aggregate_to_monthly = (timeframe == '1M')
+            original_limit = limit  # 保存原始请求数量
+            
+            if aggregate_to_weekly or aggregate_to_monthly:
+                # 用日线数据聚合
+                resample_freq = '1day'
+                # 限制周线/月线的最大请求数量（Tiingo 免费 API 有数据量限制）
+                # 周线最多请求 100 周 = 700 天 ≈ 2年
+                # 月线最多请求 36 月 = 1080 天 ≈ 3年
+                max_limit = 100 if aggregate_to_weekly else 36
+                original_limit = min(original_limit, max_limit)
+                # 需要更多日线数据来聚合（周线需要7天，月线需要30天）
+                limit = original_limit * (7 if aggregate_to_weekly else 30)
+            
             if not resample_freq:
                 logger.warning(f"Tiingo does not support timeframe: {timeframe}")
                 return []
+            
+            # 1分钟数据需要付费订阅提示
+            if timeframe == '1m':
+                logger.info(f"Note: Tiingo 1-minute forex data requires a paid subscription")
             
             # 3. 计算时间范围
             if before_time:
@@ -100,9 +122,19 @@ class ForexDataSource(BaseDataSource):
                 end_dt = datetime.now()
             
             # 根据周期和数量计算开始时间
-            tf_seconds = self._get_timeframe_seconds(timeframe)
-            # 多取一些缓冲时间
-            start_dt = end_dt - timedelta(seconds=limit * tf_seconds * 2)
+            # 注意：聚合模式下使用日线秒数计算
+            if aggregate_to_weekly or aggregate_to_monthly:
+                tf_seconds = 86400  # 日线秒数
+            else:
+                tf_seconds = self._get_timeframe_seconds(timeframe)
+            # 多取一些缓冲时间（1.5倍，外汇周末不交易）
+            start_dt = end_dt - timedelta(seconds=limit * tf_seconds * 1.5)
+            
+            # Tiingo 免费 API 最多支持约 5 年数据，限制最大时间范围
+            max_days = 365 * 3  # 最多 3 年
+            if (end_dt - start_dt).days > max_days:
+                start_dt = end_dt - timedelta(days=max_days)
+                logger.info(f"Tiingo: Limited date range to {max_days} days")
             
             # 格式化日期为 YYYY-MM-DD (Tiingo 支持该格式)
             start_date_str = start_dt.strftime('%Y-%m-%d')
@@ -175,9 +207,17 @@ class ForexDataSource(BaseDataSource):
             # 按时间排序
             klines.sort(key=lambda x: x['time'])
             
-            # 过滤
-            if len(klines) > limit:
-                klines = klines[-limit:]
+            # 如果需要聚合到周线或月线
+            if aggregate_to_weekly:
+                klines = self._aggregate_to_weekly(klines)
+                logger.debug(f"Aggregated {len(klines)} weekly candles from daily data")
+            elif aggregate_to_monthly:
+                klines = self._aggregate_to_monthly(klines)
+                logger.debug(f"Aggregated {len(klines)} monthly candles from daily data")
+            
+            # 过滤到原始请求数量
+            if len(klines) > original_limit:
+                klines = klines[-original_limit:]
             
             # logger.info(f"获取到 {len(klines)} 条 Tiingo 外汇数据")
             return klines
@@ -188,3 +228,86 @@ class ForexDataSource(BaseDataSource):
         except Exception as e:
             logger.error(f"Failed to process Tiingo data: {e}")
             return []
+    
+    def _aggregate_to_weekly(self, daily_klines: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """将日线数据聚合为周线"""
+        if not daily_klines:
+            return []
+        
+        weekly_klines = []
+        current_week = None
+        week_data = None
+        
+        for kline in daily_klines:
+            dt = datetime.fromtimestamp(kline['time'])
+            # 获取该日期所在周的周一
+            week_start = dt - timedelta(days=dt.weekday())
+            week_key = week_start.strftime('%Y-%W')
+            
+            if week_key != current_week:
+                # 保存上一周的数据
+                if week_data:
+                    weekly_klines.append(week_data)
+                # 开始新的一周
+                current_week = week_key
+                week_data = {
+                    'time': int(week_start.timestamp()),
+                    'open': kline['open'],
+                    'high': kline['high'],
+                    'low': kline['low'],
+                    'close': kline['close'],
+                    'volume': kline['volume']
+                }
+            else:
+                # 更新本周数据
+                week_data['high'] = max(week_data['high'], kline['high'])
+                week_data['low'] = min(week_data['low'], kline['low'])
+                week_data['close'] = kline['close']
+                week_data['volume'] += kline['volume']
+        
+        # 添加最后一周
+        if week_data:
+            weekly_klines.append(week_data)
+        
+        return weekly_klines
+    
+    def _aggregate_to_monthly(self, daily_klines: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """将日线数据聚合为月线"""
+        if not daily_klines:
+            return []
+        
+        monthly_klines = []
+        current_month = None
+        month_data = None
+        
+        for kline in daily_klines:
+            dt = datetime.fromtimestamp(kline['time'])
+            month_key = dt.strftime('%Y-%m')
+            
+            if month_key != current_month:
+                # 保存上个月的数据
+                if month_data:
+                    monthly_klines.append(month_data)
+                # 开始新的一月
+                current_month = month_key
+                month_start = dt.replace(day=1, hour=0, minute=0, second=0)
+                month_data = {
+                    'time': int(month_start.timestamp()),
+                    'open': kline['open'],
+                    'high': kline['high'],
+                    'low': kline['low'],
+                    'close': kline['close'],
+                    'volume': kline['volume']
+                }
+            else:
+                # 更新本月数据
+                month_data['high'] = max(month_data['high'], kline['high'])
+                month_data['low'] = min(month_data['low'], kline['low'])
+                month_data['close'] = kline['close']
+                month_data['volume'] += kline['volume']
+        
+        # 添加最后一月
+        if month_data:
+            monthly_klines.append(month_data)
+        
+        return monthly_klines
