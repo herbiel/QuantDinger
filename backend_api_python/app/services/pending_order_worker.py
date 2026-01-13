@@ -417,9 +417,8 @@ class PendingOrderWorker:
                     cur = db.cursor()
                     for rid in to_delete_ids:
                         cur.execute("DELETE FROM qd_strategy_positions WHERE id = %s", (int(rid),))
-                    now_ts = int(time.time())
                     for u in to_update:
-                        cur.execute("UPDATE qd_strategy_positions SET size = %s, updated_at = %s WHERE id = %s", (float(u["size"]), now_ts, int(u["id"])))
+                        cur.execute("UPDATE qd_strategy_positions SET size = %s, updated_at = NOW() WHERE id = %s", (float(u["size"]), int(u["id"])))
                     db.commit()
                     cur.close()
 
@@ -436,24 +435,22 @@ class PendingOrderWorker:
             except Exception:
                 stale_sec = 0
             if stale_sec > 0:
-                now = int(time.time())
-                cutoff = now - stale_sec
                 with get_db_connection() as db:
                     cur = db.cursor()
                     cur.execute(
                         """
                         UPDATE pending_orders
                         SET status = 'pending',
-                            updated_at = %s,
+                            updated_at = NOW(),
                             dispatch_note = CASE
                                 WHEN dispatch_note IS NULL OR dispatch_note = '' THEN 'requeued_stale_processing'
                                 ELSE dispatch_note
                             END
                         WHERE status = 'processing'
-                          AND (updated_at IS NULL OR updated_at < %s)
+                          AND (updated_at IS NULL OR updated_at < NOW() - INTERVAL '%s seconds')
                           AND (attempts < max_attempts)
                         """,
-                        (now, cutoff),
+                        (stale_sec,),
                     )
                     db.commit()
                     cur.close()

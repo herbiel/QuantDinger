@@ -2191,19 +2191,32 @@ class TradingExecutor:
         title: str,
         message: str,
         payload: Optional[Dict[str, Any]] = None,
+        user_id: int = None,
     ) -> None:
         """Best-effort persist notification row for the frontend '通知' panel (browser channel)."""
         try:
             now = int(time.time())
+            # Get user_id from strategy if not provided
+            if user_id is None:
+                try:
+                    with get_db_connection() as db:
+                        cur = db.cursor()
+                        cur.execute("SELECT user_id FROM qd_strategies_trading WHERE id = ?", (strategy_id,))
+                        row = cur.fetchone()
+                        cur.close()
+                    user_id = int((row or {}).get('user_id') or 1)
+                except Exception:
+                    user_id = 1
             with get_db_connection() as db:
                 cur = db.cursor()
                 cur.execute(
                     """
                     INSERT INTO qd_strategy_notifications
-                    (strategy_id, symbol, signal_type, channels, title, message, payload_json, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (user_id, strategy_id, symbol, signal_type, channels, title, message, payload_json, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
+                        int(user_id),
                         int(strategy_id),
                         str(symbol or ""),
                         str(signal_type or ""),
@@ -2419,18 +2432,28 @@ class TradingExecutor:
                     # Best-effort only; do not block enqueue on dedup query errors.
                     pass
 
+                # Get user_id from strategy
+                user_id = 1
+                try:
+                    cur.execute("SELECT user_id FROM qd_strategies_trading WHERE id = %s", (strategy_id,))
+                    row = cur.fetchone()
+                    user_id = int((row or {}).get('user_id') or 1)
+                except Exception:
+                    pass
+
                 cur.execute(
                     """
                     INSERT INTO pending_orders
-                    (strategy_id, symbol, signal_type, signal_ts, market_type, order_type, amount, price,
+                    (user_id, strategy_id, symbol, signal_type, signal_ts, market_type, order_type, amount, price,
                      execution_mode, status, priority, attempts, max_attempts, last_error, payload_json,
                      created_at, updated_at, processed_at, sent_at)
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s,
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s,
                      %s, %s, %s, %s, %s, %s, %s,
                      %s, %s, %s, %s)
                     """,
                     (
+                        int(user_id),
                         int(strategy_id),
                         symbol,
                         signal_type,
@@ -2473,16 +2496,24 @@ class TradingExecutor:
     def _record_trade(self, strategy_id: int, symbol: str, type: str, price: float, amount: float, value: float, profit: float = None, commission: float = None):
         """记录交易到数据库"""
         try:
+            # Get user_id from strategy
+            user_id = 1
             with get_db_connection() as db:
                 cursor = db.cursor()
+                try:
+                    cursor.execute("SELECT user_id FROM qd_strategies_trading WHERE id = %s", (strategy_id,))
+                    row = cursor.fetchone()
+                    user_id = int((row or {}).get('user_id') or 1)
+                except Exception:
+                    pass
                 query = """
                     INSERT INTO qd_strategy_trades (
-                        strategy_id, symbol, type, price, amount, value, commission, profit, created_at
+                        user_id, strategy_id, symbol, type, price, amount, value, commission, profit, created_at
                     ) VALUES (
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     )
                 """
-                cursor.execute(query, (strategy_id, symbol, type, price, amount, value, commission or 0, profit, int(time.time())))
+                cursor.execute(query, (user_id, strategy_id, symbol, type, price, amount, value, commission or 0, profit, int(time.time())))
                 db.commit()
                 cursor.close()
         except Exception as e:
@@ -2501,24 +2532,32 @@ class TradingExecutor:
     ):
         """更新持仓状态"""
         try:
+            # Get user_id from strategy
+            user_id = 1
             with get_db_connection() as db:
                 cursor = db.cursor()
+                try:
+                    cursor.execute("SELECT user_id FROM qd_strategies_trading WHERE id = %s", (strategy_id,))
+                    row = cursor.fetchone()
+                    user_id = int((row or {}).get('user_id') or 1)
+                except Exception:
+                    pass
                 # 简化：直接 Update 或 Insert
                 upsert_query = """
                     INSERT INTO qd_strategy_positions (
-                        strategy_id, symbol, side, size, entry_price, current_price, highest_price, lowest_price, updated_at
+                        user_id, strategy_id, symbol, side, size, entry_price, current_price, highest_price, lowest_price, updated_at
                     ) VALUES (
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     ) ON CONFLICT(strategy_id, symbol, side) DO UPDATE SET
                         size = excluded.size,
                         entry_price = excluded.entry_price,
                         current_price = excluded.current_price,
-                        highest_price = CASE WHEN excluded.highest_price > 0 THEN excluded.highest_price ELSE highest_price END,
-                        lowest_price = CASE WHEN excluded.lowest_price > 0 THEN excluded.lowest_price ELSE lowest_price END,
+                        highest_price = CASE WHEN excluded.highest_price > 0 THEN excluded.highest_price ELSE qd_strategy_positions.highest_price END,
+                        lowest_price = CASE WHEN excluded.lowest_price > 0 THEN excluded.lowest_price ELSE qd_strategy_positions.lowest_price END,
                         updated_at = excluded.updated_at
                 """
                 cursor.execute(upsert_query, (
-                    strategy_id, symbol, side, size, entry_price, current_price, highest_price, lowest_price, int(time.time())
+                    user_id, strategy_id, symbol, side, size, entry_price, current_price, highest_price, lowest_price, int(time.time())
                 ))
                 db.commit()
                 cursor.close()

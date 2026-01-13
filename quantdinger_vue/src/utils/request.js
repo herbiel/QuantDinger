@@ -15,9 +15,12 @@ const request = axios.create({
   // API 请求的默认前缀
   // 生产环境应由 Nginx 处理，开发环境由 devServer proxy 处理
   baseURL: '/',
-  timeout: 6000, // 请求超时时间
+  timeout: 30000, // Default request timeout 30s
   withCredentials: true // 允许携带 cookies
 })
+
+// Extended timeout for long-running AI analysis APIs
+export const ANALYSIS_TIMEOUT = 180000 // 3 minutes for AI analysis
 
 // 异常拦截处理器
 const errorHandler = (error) => {
@@ -25,8 +28,8 @@ const errorHandler = (error) => {
     const data = error.response.data
     if (error.response.status === 403) {
       notification.error({
-        message: 'Forbidden',
-        description: data.message
+        message: '(Demo Mode)',
+        description: data.msg || data.message || 'Read-only in demo mode'
       })
     }
     if (error.response.status === 401 && !(data.result && data.result.isLogin)) {
