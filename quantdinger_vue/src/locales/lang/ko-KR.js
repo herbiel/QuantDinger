@@ -1785,7 +1785,42 @@ const locale = {
   'settings.field.AGENT_MEMORY_W_RECENCY': '시간 가중치',
   'settings.field.AGENT_MEMORY_W_RETURNS': '수익 가중치',
   'settings.field.ENABLE_REFLECTION_WORKER': '자동 검증 사용',
-  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': '검증 주기(초)'
+  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': '검증 주기(초)',
+
+  // Profile - Notification Settings (알림 설정)
+  'profile.notifications.title': '알림 설정',
+  'profile.notifications.hint': '기본 알림 방법을 설정하세요. 자산 모니터링 및 알림 생성 시 자동으로 사용됩니다',
+  'profile.notifications.defaultChannels': '기본 알림 채널',
+  'profile.notifications.browser': '앱 내 알림',
+  'profile.notifications.email': '이메일',
+  'profile.notifications.phone': 'SMS',
+  'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+  'profile.notifications.telegramBotTokenPlaceholder': 'Telegram Bot Token을 입력하세요',
+  'profile.notifications.telegramBotTokenHint': '@BotFather에서 봇을 만들어 Token을 받으세요',
+  'profile.notifications.telegramChatId': 'Telegram Chat ID',
+  'profile.notifications.telegramPlaceholder': 'Telegram Chat ID를 입력하세요 (예: 123456789)',
+  'profile.notifications.telegramHint': '@userinfobot에 /start를 보내 Chat ID를 받으세요',
+  'profile.notifications.notifyEmail': '알림 이메일',
+  'profile.notifications.emailPlaceholder': '알림을 받을 이메일 주소',
+  'profile.notifications.emailHint': '기본값은 계정 이메일이며 다른 이메일도 설정 가능',
+  'profile.notifications.phonePlaceholder': '전화번호를 입력하세요 (예: +821012345678)',
+  'profile.notifications.phoneHint': '관리자가 Twilio 서비스를 설정해야 합니다',
+  'profile.notifications.discordWebhook': 'Discord Webhook',
+  'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+  'profile.notifications.discordHint': 'Discord 서버 설정에서 Webhook을 생성하세요',
+  'profile.notifications.webhookUrl': 'Webhook URL',
+  'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+  'profile.notifications.webhookHint': '커스텀 Webhook URL, POST JSON으로 알림 전송',
+  'profile.notifications.webhookToken': 'Webhook Token (선택)',
+  'profile.notifications.webhookTokenPlaceholder': '요청 인증용 Bearer Token',
+  'profile.notifications.webhookTokenHint': 'Authorization: Bearer Token으로 Webhook에 전송',
+  'profile.notifications.testBtn': '테스트 알림 보내기',
+  'profile.notifications.saveSuccess': '알림 설정이 저장되었습니다',
+  'profile.notifications.selectChannel': '최소 하나의 알림 채널을 선택하세요',
+  'profile.notifications.fillTelegramToken': 'Telegram Bot Token을 입력하세요',
+  'profile.notifications.fillTelegram': 'Telegram Chat ID를 입력하세요',
+  'profile.notifications.fillEmail': '알림 이메일을 입력하세요',
+  'profile.notifications.testSent': '테스트 알림이 전송되었습니다. 알림 채널을 확인하세요'
 }
 
 export default {

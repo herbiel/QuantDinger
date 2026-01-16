@@ -4,7 +4,7 @@
       <a-avatar size="small" :src="currentUser.avatar" class="antd-pro-global-header-index-avatar" />
       <span>{{ currentUser.name }}</span>
     </span>
-    <template v-slot:overlay>
+    <template #overlay>
       <a-menu class="ant-pro-drop-down menu" :selected-keys="[]">
         <a-menu-item key="profile" @click="handleProfile">
           <a-icon type="user" />

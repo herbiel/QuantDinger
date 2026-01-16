@@ -399,15 +399,23 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~ant-design-vue/es/style/themes/default.less';
+
 .notice-icon-wrapper {
   display: inline-block;
+  vertical-align: top;
 }
 
 .header-notice {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: @layout-header-height;
+  line-height: @layout-header-height;
   transition: all 0.3s;
   cursor: pointer;
   padding: 0 12px;
+  vertical-align: top;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
@@ -415,6 +423,13 @@ export default {
 
   span {
     vertical-align: initial;
+  }
+}
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+  .header-notice {
+    padding: 0 8px;
   }
 }
 

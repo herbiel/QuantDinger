@@ -391,7 +391,7 @@
             <a-icon type="eye" />
             <span>{{ $t('portfolio.monitors.title') }}</span>
           </h3>
-          <a-button type="primary" @click="showAddMonitorModal = true">
+          <a-button type="primary" @click="openAddMonitorModal">
             <a-icon type="plus" />
             {{ $t('portfolio.monitors.add') }}
           </a-button>
@@ -401,7 +401,7 @@
           <div class="monitors-list">
             <div v-if="monitors.length === 0" class="empty-state small">
               <a-empty :description="$t('portfolio.monitors.empty')" :image="simpleImage">
-                <a-button type="primary" size="small" @click="showAddMonitorModal = true">
+                <a-button type="primary" size="small" @click="openAddMonitorModal">
                   <a-icon type="plus" />
                   {{ $t('portfolio.monitors.addFirst') }}
                 </a-button>
@@ -718,31 +718,22 @@
           </a-checkbox-group>
         </a-form-item>
 
-        <!-- Telegram Chat ID -->
-        <a-form-item
-          v-show="alertChannels.includes('telegram')"
-          :label="$t('portfolio.form.telegramChatId')"
+        <!-- Notification settings hint -->
+        <a-alert
+          v-if="alertChannels.includes('telegram') || alertChannels.includes('email')"
+          type="info"
+          showIcon
+          style="margin-bottom: 16px"
         >
-          <a-input
-            v-model="alertTelegramChatId"
-            :placeholder="$t('portfolio.form.enterTelegramChatId')"
-          >
-            <a-icon slot="prefix" type="message" />
-          </a-input>
-        </a-form-item>
-
-        <!-- Email -->
-        <a-form-item
-          v-show="alertChannels.includes('email')"
-          :label="$t('portfolio.form.emailAddress')"
-        >
-          <a-input
-            v-model="alertEmail"
-            :placeholder="$t('portfolio.form.enterEmail')"
-          >
-            <a-icon slot="prefix" type="mail" />
-          </a-input>
-        </a-form-item>
+          <template #message>
+            <span>
+              {{ $t('portfolio.form.notificationFromProfile') || '通知将发送到您在个人中心配置的地址' }}
+              <router-link to="/profile" style="margin-left: 8px">
+                <a-icon type="setting" /> {{ $t('portfolio.form.goToProfile') || '前往配置' }}
+              </router-link>
+            </span>
+          </template>
+        </a-alert>
 
         <!-- 启用状态 -->
         <a-form-item :label="$t('portfolio.alerts.enabled')">
@@ -806,21 +797,22 @@
           </a-checkbox-group>
         </a-form-item>
 
-        <!-- Telegram Chat ID -->
-        <a-form-item :label="$t('portfolio.form.telegramChatId')" v-show="monitorChannels.includes('telegram')">
-          <a-input
-            v-model="monitorTelegramChatId"
-            :placeholder="$t('portfolio.form.enterTelegramChatId')"
-          />
-        </a-form-item>
-
-        <!-- Email -->
-        <a-form-item :label="$t('portfolio.form.emailAddress')" v-show="monitorChannels.includes('email')">
-          <a-input
-            v-model="monitorEmail"
-            :placeholder="$t('portfolio.form.enterEmail')"
-          />
-        </a-form-item>
+        <!-- Notification settings hint -->
+        <a-alert
+          v-if="monitorChannels.includes('telegram') || monitorChannels.includes('email')"
+          type="info"
+          showIcon
+          style="margin-bottom: 16px"
+        >
+          <template #message>
+            <span>
+              {{ $t('portfolio.form.notificationFromProfile') || '通知将发送到您在个人中心配置的地址' }}
+              <router-link to="/profile" style="margin-left: 8px">
+                <a-icon type="setting" /> {{ $t('portfolio.form.goToProfile') || '前往配置' }}
+              </router-link>
+            </span>
+          </template>
+        </a-alert>
 
         <!-- 监控范围 -->
         <a-form-item :label="$t('portfolio.form.monitorScope')">
@@ -894,6 +886,7 @@ import {
   getGroups,
   searchSymbols, getMarketTypes
 } from '@/api/portfolio'
+import { getNotificationSettings } from '@/api/user'
 
 export default {
   name: 'Portfolio',
@@ -954,18 +947,23 @@ export default {
       alertPosition: null,
       // Alert channels (for reactive display)
       alertChannels: ['browser'],
-      // Alert notification targets
-      alertTelegramChatId: '',
-      alertEmail: '',
       // Monitor channels (for reactive display)
       monitorChannels: ['browser'],
-      // Monitor notification targets
-      monitorTelegramChatId: '',
-      monitorEmail: '',
       // Monitor scope (all or selected positions)
       monitorScope: 'all',
       // Selected positions for monitoring
-      selectedMonitorPositions: []
+      selectedMonitorPositions: [],
+      // User's default notification settings (loaded from profile)
+      userNotificationSettings: {
+        default_channels: ['browser'],
+        telegram_bot_token: '',
+        telegram_chat_id: '',
+        email: '',
+        phone: '',
+        discord_webhook: '',
+        webhook_url: '',
+        webhook_token: ''
+      }
     }
   },
   computed: {
@@ -1053,6 +1051,8 @@ export default {
     this.priceRefreshTimer = setInterval(() => {
       this.refreshPrices()
     }, 30000)
+    // Load user's notification settings for default values
+    this.loadUserNotificationSettings()
   },
   beforeDestroy () {
     if (this.priceRefreshTimer) {
@@ -1063,6 +1063,26 @@ export default {
     }
   },
   methods: {
+    async loadUserNotificationSettings () {
+      // Load user's default notification settings
+      try {
+        const res = await getNotificationSettings()
+        if (res.code === 1 && res.data) {
+          this.userNotificationSettings = {
+            default_channels: res.data.default_channels || ['browser'],
+            telegram_bot_token: res.data.telegram_bot_token || '',
+            telegram_chat_id: res.data.telegram_chat_id || '',
+            email: res.data.email || '',
+            phone: res.data.phone || '',
+            discord_webhook: res.data.discord_webhook || '',
+            webhook_url: res.data.webhook_url || '',
+            webhook_token: res.data.webhook_token || ''
+          }
+        }
+      } catch (e) {
+        // Silently fail, use default values
+      }
+    },
     async loadData () {
       await Promise.all([
         this.loadPositions(),
@@ -1314,12 +1334,10 @@ export default {
         this.editAlert(existingAlert)
         return
       }
-      // 创建新的 Alert
+      // 创建新的 Alert - 使用用户默认通知设置
       this.editingAlert = null
       this.alertPosition = pos
-      this.alertChannels = ['browser']
-      this.alertTelegramChatId = ''
-      this.alertEmail = ''
+      this.alertChannels = [...(this.userNotificationSettings.default_channels || ['browser'])]
       this.showAddAlertModal = true
       this.$nextTick(() => {
         this.alertForm.setFieldsValue({
@@ -1341,10 +1359,8 @@ export default {
         current_price: 0,
         entry_price: 0
       }
-      // Set channels and targets directly with v-model binding
+      // Set channels directly with v-model binding
       this.alertChannels = [...(alert.notification_config?.channels || ['browser'])]
-      this.alertTelegramChatId = alert.notification_config?.targets?.telegram || ''
-      this.alertEmail = alert.notification_config?.targets?.email || ''
       // Show modal
       this.showAddAlertModal = true
       // Set form values for fields still using v-decorator
@@ -1366,13 +1382,28 @@ export default {
         if (err) return
         this.savingAlert = true
         try {
-          // 构建通知目标 - 使用 v-model 绑定的值
+          // 构建通知目标 - 使用用户在个人中心配置的值
           const targets = {}
-          if (this.alertChannels.includes('telegram') && this.alertTelegramChatId) {
-            targets.telegram = this.alertTelegramChatId.trim()
+          if (this.alertChannels.includes('telegram') && this.userNotificationSettings.telegram_chat_id) {
+            targets.telegram = this.userNotificationSettings.telegram_chat_id
+            if (this.userNotificationSettings.telegram_bot_token) {
+              targets.telegram_bot_token = this.userNotificationSettings.telegram_bot_token
+            }
           }
-          if (this.alertChannels.includes('email') && this.alertEmail) {
-            targets.email = this.alertEmail.trim()
+          if (this.alertChannels.includes('email') && this.userNotificationSettings.email) {
+            targets.email = this.userNotificationSettings.email
+          }
+          if (this.alertChannels.includes('phone') && this.userNotificationSettings.phone) {
+            targets.phone = this.userNotificationSettings.phone
+          }
+          if (this.alertChannels.includes('discord') && this.userNotificationSettings.discord_webhook) {
+            targets.discord = this.userNotificationSettings.discord_webhook
+          }
+          if (this.alertChannels.includes('webhook') && this.userNotificationSettings.webhook_url) {
+            targets.webhook = this.userNotificationSettings.webhook_url
+            if (this.userNotificationSettings.webhook_token) {
+              targets.webhook_token = this.userNotificationSettings.webhook_token
+            }
           }
 
           const data = {
@@ -1430,9 +1461,7 @@ export default {
       this.showAddAlertModal = false
       this.editingAlert = null
       this.alertPosition = null
-      this.alertChannels = ['browser']
-      this.alertTelegramChatId = ''
-      this.alertEmail = ''
+      this.alertChannels = [...(this.userNotificationSettings.default_channels || ['browser'])]
       this.alertForm.resetFields()
     },
     confirmDeleteAlert () {
@@ -1468,6 +1497,19 @@ export default {
       }
     },
     // Monitor methods
+    openAddMonitorModal () {
+      // Initialize with user's default notification settings
+      this.editingMonitor = null
+      this.monitorChannels = [...(this.userNotificationSettings.default_channels || ['browser'])]
+      this.monitorScope = 'all'
+      this.selectedMonitorPositions = []
+      this.showAddMonitorModal = true
+      this.$nextTick(() => {
+        if (this.monitorForm) {
+          this.monitorForm.resetFields()
+        }
+      })
+    },
     handleMonitorChannelsChange (channels) {
       this.monitorChannels = channels || []
     },
@@ -1475,8 +1517,6 @@ export default {
       this.editingMonitor = monitor
       // Set channels directly with v-model binding
       this.monitorChannels = [...(monitor.notification_config?.channels || ['browser'])]
-      this.monitorTelegramChatId = monitor.notification_config?.targets?.telegram || ''
-      this.monitorEmail = monitor.notification_config?.targets?.email || ''
       // Update monitor scope and selected positions
       let positionIds = []
       if (monitor.position_ids) {
@@ -1540,11 +1580,16 @@ export default {
               language: this.$store.getters.lang || 'en-US'
             },
             notification_config: {
-              // Use v-model bound values instead of form values
+              // Use user's profile notification settings
               channels: this.monitorChannels.length > 0 ? this.monitorChannels : ['browser'],
               targets: {
-                telegram: this.monitorTelegramChatId || '',
-                email: this.monitorEmail || ''
+                telegram: this.userNotificationSettings.telegram_chat_id || '',
+                telegram_bot_token: this.userNotificationSettings.telegram_bot_token || '',
+                email: this.userNotificationSettings.email || '',
+                phone: this.userNotificationSettings.phone || '',
+                discord: this.userNotificationSettings.discord_webhook || '',
+                webhook: this.userNotificationSettings.webhook_url || '',
+                webhook_token: this.userNotificationSettings.webhook_token || ''
               }
             },
             is_active: true
@@ -1644,9 +1689,7 @@ export default {
       this.showAddMonitorModal = false
       this.editingMonitor = null
       this.monitorForm.resetFields()
-      this.monitorChannels = ['browser'] // Reset to default
-      this.monitorTelegramChatId = '' // Reset telegram
-      this.monitorEmail = '' // Reset email
+      this.monitorChannels = [...(this.userNotificationSettings.default_channels || ['browser'])] // Reset to user default
       this.monitorScope = 'all' // Reset monitor scope
       this.selectedMonitorPositions = [] // Reset selected positions
     },
@@ -1704,7 +1747,25 @@ export default {
     },
     formatTime (timestamp) {
       if (!timestamp) return '-'
-      const d = new Date(timestamp * 1000)
+      let d
+      // 如果是数字（秒级时间戳），乘以 1000
+      if (typeof timestamp === 'number') {
+        d = new Date(timestamp * 1000)
+      } else if (typeof timestamp === 'string') {
+        // 如果是纯数字字符串（秒级时间戳）
+        if (/^\d+$/.test(timestamp)) {
+          d = new Date(parseInt(timestamp, 10) * 1000)
+        } else {
+          // ISO 日期字符串或其他格式，直接解析
+          d = new Date(timestamp)
+        }
+      } else {
+        return '-'
+      }
+      // 检查日期是否有效
+      if (isNaN(d.getTime())) {
+        return '-'
+      }
       return d.toLocaleString()
     },
     getIntervalText (minutes) {

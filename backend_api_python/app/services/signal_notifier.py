@@ -92,18 +92,18 @@ class SignalNotifier:
     """
     Notify signal events across channels.
 
-    Provider environment variables:
-    - SIGNAL_NOTIFY_TIMEOUT_SEC: HTTP timeout (default: 6)
+    通知配置说明:
+    - 用户在个人中心配置自己的通知设置（telegram_bot_token, telegram_chat_id, email 等）
+    - 创建策略/监控时，系统自动使用用户配置的通知目标
 
-    - SIGNAL_WEBHOOK_TOKEN: optional bearer token for generic webhook channel
-
-    - TELEGRAM_BOT_TOKEN: Telegram bot token (required for telegram channel)
-
+    公共服务配置（管理员在系统设置中配置）:
     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_USE_TLS
-      (required for email channel)
-
+      (邮件服务，所有用户共用)
     - TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
-      (optional for phone/SMS channel)
+      (短信服务，所有用户共用)
+
+    可选的环境变量:
+    - SIGNAL_NOTIFY_TIMEOUT_SEC: HTTP timeout (default: 6)
     """
 
     def __init__(self) -> None:
@@ -112,10 +112,7 @@ class SignalNotifier:
         except Exception:
             self.timeout_sec = 6.0
 
-        self.webhook_token = (os.getenv("SIGNAL_WEBHOOK_TOKEN") or "").strip()
-
-        self.telegram_token = (os.getenv("TELEGRAM_BOT_TOKEN") or "").strip()
-
+        # 公共 SMTP 配置（管理员在系统设置中配置）
         self.smtp_host = (os.getenv("SMTP_HOST") or "").strip()
         try:
             self.smtp_port = int(os.getenv("SMTP_PORT") or "587")
@@ -184,7 +181,7 @@ class SignalNotifier:
                         payload=payload,
                     )
                 elif c == "webhook":
-                    url = (targets.get("webhook") or os.getenv("SIGNAL_WEBHOOK_URL") or "").strip()
+                    url = (targets.get("webhook") or "").strip()
                     ok, err = self._notify_webhook(
                         url=url,
                         payload=payload,
@@ -201,19 +198,18 @@ class SignalNotifier:
                     ok, err = self._notify_discord(url=url, payload=payload, fallback_text=message_plain)
                 elif c == "telegram":
                     chat_id = (targets.get("telegram") or "").strip()
-                    # Support per-strategy token override (local mode). Falls back to env TELEGRAM_BOT_TOKEN.
+                    # User's token takes priority, then falls back to env TELEGRAM_BOT_TOKEN.
                     token_override = ""
-                    if not self.telegram_token:
-                        try:
-                            token_override = str(
-                                targets.get("telegram_bot_token")
-                                or targets.get("telegram_token")
-                                or cfg.get("telegram_bot_token")
-                                or cfg.get("telegram_token")
-                                or ""
-                            ).strip()
-                        except Exception:
-                            token_override = ""
+                    try:
+                        token_override = str(
+                            targets.get("telegram_bot_token")
+                            or targets.get("telegram_token")
+                            or cfg.get("telegram_bot_token")
+                            or cfg.get("telegram_token")
+                            or ""
+                        ).strip()
+                    except Exception:
+                        token_override = ""
                     ok, err = self._notify_telegram(
                         chat_id=chat_id,
                         text=rendered.get("telegram_html") or message_plain,
@@ -500,15 +496,15 @@ class SignalNotifier:
         """
         Generic webhook delivery.
 
-        Supports (best-effort):
-        - per-strategy headers: notification_config.targets.webhook_headers (dict or JSON string)
-        - per-strategy bearer token: notification_config.targets.webhook_token
-        - global bearer token: SIGNAL_WEBHOOK_TOKEN
-        - optional signing secret: notification_config.targets.webhook_signing_secret or env SIGNAL_WEBHOOK_SIGNING_SECRET
-          Adds headers:
-            - X-QD-Timestamp: unix seconds
-            - X-QD-Signature: hex(HMAC_SHA256("{ts}.{body}", secret))
-        - retry once on 429/5xx
+        用户在个人中心配置：
+        - webhook_url: Webhook 地址
+        - webhook_token: Bearer Token（可选）
+
+        支持功能：
+        - 自定义 headers: notification_config.targets.webhook_headers
+        - Bearer Token: notification_config.targets.webhook_token
+        - 签名验证: notification_config.targets.webhook_signing_secret
+        - 自动重试: 429/5xx 时重试一次
         """
         if not url:
             return False, "missing_webhook_url"
@@ -535,10 +531,8 @@ class SignalNotifier:
                     continue
                 headers[kk] = str(v if v is not None else "")
 
-        # Auth (per-strategy token first, fallback to global token)
+        # Auth (user's token from notification_config.targets.webhook_token)
         tok = str(token_override or "").strip()
-        if not tok:
-            tok = self.webhook_token
         if tok and "Authorization" not in headers:
             headers["Authorization"] = f"Bearer {tok}"
 
@@ -662,9 +656,10 @@ class SignalNotifier:
         token_override: str = "",
         parse_mode: str = "",
     ) -> Tuple[bool, str]:
-        token = (token_override or "").strip() or (self.telegram_token or "").strip()
+        # 用户必须在个人中心配置自己的 telegram_bot_token
+        token = (token_override or "").strip()
         if not token:
-            return False, "missing_TELEGRAM_BOT_TOKEN"
+            return False, "missing_telegram_bot_token (请在个人中心配置 Telegram Bot Token)"
         if not chat_id:
             return False, "missing_telegram_chat_id"
         url = f"https://api.telegram.org/bot{token}/sendMessage"

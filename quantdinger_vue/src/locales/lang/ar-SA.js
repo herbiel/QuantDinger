@@ -1781,7 +1781,42 @@ const locale = {
   'settings.field.AGENT_MEMORY_W_RECENCY': 'وزن الحداثة',
   'settings.field.AGENT_MEMORY_W_RETURNS': 'وزن العائد',
   'settings.field.ENABLE_REFLECTION_WORKER': 'تمكين التحقق التلقائي',
-  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'فاصل التحقق (ثانية)'
+  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'فاصل التحقق (ثانية)',
+
+  // Profile - Notification Settings (إعدادات الإشعارات)
+  'profile.notifications.title': 'إعدادات الإشعارات',
+  'profile.notifications.hint': 'قم بتكوين طرق الإشعارات الافتراضية، سيتم استخدامها تلقائياً عند إنشاء مراقبة الأصول والتنبيهات',
+  'profile.notifications.defaultChannels': 'قنوات الإشعارات الافتراضية',
+  'profile.notifications.browser': 'إشعار داخل التطبيق',
+  'profile.notifications.email': 'البريد الإلكتروني',
+  'profile.notifications.phone': 'رسالة نصية',
+  'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+  'profile.notifications.telegramBotTokenPlaceholder': 'أدخل Telegram Bot Token الخاص بك',
+  'profile.notifications.telegramBotTokenHint': 'أنشئ بوت عبر @BotFather للحصول على Token',
+  'profile.notifications.telegramChatId': 'Telegram Chat ID',
+  'profile.notifications.telegramPlaceholder': 'أدخل Telegram Chat ID الخاص بك (مثال: 123456789)',
+  'profile.notifications.telegramHint': 'أرسل /start إلى @userinfobot للحصول على Chat ID',
+  'profile.notifications.notifyEmail': 'بريد الإشعارات',
+  'profile.notifications.emailPlaceholder': 'عنوان البريد الإلكتروني لاستلام الإشعارات',
+  'profile.notifications.emailHint': 'يستخدم بريد الحساب بشكل افتراضي، يمكنك تعيين بريد آخر',
+  'profile.notifications.phonePlaceholder': 'أدخل رقم الهاتف (مثال: +966501234567)',
+  'profile.notifications.phoneHint': 'يحتاج المسؤول إلى تكوين خدمة Twilio',
+  'profile.notifications.discordWebhook': 'Discord Webhook',
+  'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+  'profile.notifications.discordHint': 'أنشئ Webhook في إعدادات خادم Discord',
+  'profile.notifications.webhookUrl': 'Webhook URL',
+  'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+  'profile.notifications.webhookHint': 'عنوان Webhook مخصص، يرسل الإشعارات عبر POST JSON',
+  'profile.notifications.webhookToken': 'Webhook Token (اختياري)',
+  'profile.notifications.webhookTokenPlaceholder': 'Bearer Token للتحقق من الطلب',
+  'profile.notifications.webhookTokenHint': 'يُرسل كـ Authorization: Bearer Token إلى Webhook',
+  'profile.notifications.testBtn': 'إرسال إشعار تجريبي',
+  'profile.notifications.saveSuccess': 'تم حفظ إعدادات الإشعارات بنجاح',
+  'profile.notifications.selectChannel': 'الرجاء اختيار قناة إشعار واحدة على الأقل',
+  'profile.notifications.fillTelegramToken': 'الرجاء إدخال Telegram Bot Token',
+  'profile.notifications.fillTelegram': 'الرجاء إدخال Telegram Chat ID',
+  'profile.notifications.fillEmail': 'الرجاء إدخال بريد الإشعارات',
+  'profile.notifications.testSent': 'تم إرسال الإشعار التجريبي، يرجى التحقق من قنوات الإشعارات'
 }
 
 export default {

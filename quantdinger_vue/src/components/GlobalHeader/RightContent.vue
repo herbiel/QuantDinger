@@ -76,13 +76,38 @@ export default {
 
 /* 浅色主题（默认） */
 .ant-pro-global-header-index-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
   .ant-pro-global-header-index-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: @layout-header-height;
+    padding: 0 12px;
     color: rgba(0, 0, 0, 0.65);
     transition: all 0.3s;
+    cursor: pointer;
+    vertical-align: top;
 
     &:hover {
       color: @primary-color;
       background: rgba(0, 0, 0, 0.04);
+    }
+  }
+}
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+  .ant-pro-global-header-index-right {
+    .ant-pro-global-header-index-action {
+      padding: 0 8px;
+    }
+
+    .ant-pro-drop-down,
+    .ant-pro-account-avatar {
+      padding: 0 8px;
     }
   }
 }

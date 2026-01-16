@@ -348,9 +348,11 @@ def get_user_credits_log():
 @user_bp.route('/profile', methods=['GET'])
 @login_required
 def get_profile():
-    """Get current user's profile with billing info"""
+    """Get current user's profile with billing info and notification settings"""
     try:
+        import json
         from app.services.billing_service import get_billing_service
+        from app.utils.db import get_db_connection
         
         user_id = getattr(g, 'user_id', None)
         if not user_id:
@@ -366,6 +368,27 @@ def get_profile():
         # Add billing info
         billing_info = get_billing_service().get_user_billing_info(user_id)
         user['billing'] = billing_info
+        
+        # Add notification settings
+        with get_db_connection() as db:
+            cur = db.cursor()
+            cur.execute("SELECT notification_settings FROM qd_users WHERE id = ?", (user_id,))
+            row = cur.fetchone()
+            cur.close()
+        
+        settings_str = (row.get('notification_settings') if row else '') or ''
+        notification_settings = {}
+        if settings_str:
+            try:
+                notification_settings = json.loads(settings_str)
+            except Exception:
+                notification_settings = {}
+        
+        # Default values
+        if 'default_channels' not in notification_settings:
+            notification_settings['default_channels'] = ['browser']
+        
+        user['notification_settings'] = notification_settings
         
         return jsonify({
             'code': 1,
@@ -526,6 +549,129 @@ def get_my_referrals():
         })
     except Exception as e:
         logger.error(f"get_my_referrals failed: {e}")
+        return jsonify({'code': 0, 'msg': str(e), 'data': None}), 500
+
+
+@user_bp.route('/notification-settings', methods=['GET'])
+@login_required
+def get_notification_settings():
+    """
+    Get current user's notification settings.
+    
+    Returns:
+        notification_settings: {
+            default_channels: ['browser', 'telegram', ...],
+            telegram_chat_id: str,
+            email: str (optional, override for notifications),
+            discord_webhook: str (optional)
+        }
+    """
+    try:
+        import json
+        from app.utils.db import get_db_connection
+        
+        user_id = getattr(g, 'user_id', None)
+        if not user_id:
+            return jsonify({'code': 0, 'msg': 'Not authenticated', 'data': None}), 401
+        
+        with get_db_connection() as db:
+            cur = db.cursor()
+            cur.execute("SELECT notification_settings, email FROM qd_users WHERE id = ?", (user_id,))
+            row = cur.fetchone()
+            cur.close()
+        
+        if not row:
+            return jsonify({'code': 0, 'msg': 'User not found', 'data': None}), 404
+        
+        # Parse notification_settings JSON
+        settings_str = row.get('notification_settings') or ''
+        settings = {}
+        if settings_str:
+            try:
+                settings = json.loads(settings_str)
+            except Exception:
+                settings = {}
+        
+        # Default values
+        if 'default_channels' not in settings:
+            settings['default_channels'] = ['browser']
+        if 'email' not in settings:
+            settings['email'] = row.get('email') or ''
+        
+        return jsonify({
+            'code': 1,
+            'msg': 'success',
+            'data': settings
+        })
+    except Exception as e:
+        logger.error(f"get_notification_settings failed: {e}")
+        return jsonify({'code': 0, 'msg': str(e), 'data': None}), 500
+
+
+@user_bp.route('/notification-settings', methods=['PUT'])
+@login_required
+def update_notification_settings():
+    """
+    Update current user's notification settings.
+    
+    Request body:
+        default_channels: list of str (optional, e.g. ['browser', 'telegram'])
+        telegram_bot_token: str (optional, user's own Telegram bot token)
+        telegram_chat_id: str (optional)
+        email: str (optional, for notification override)
+        discord_webhook: str (optional)
+    """
+    try:
+        import json
+        from app.utils.db import get_db_connection
+        
+        user_id = getattr(g, 'user_id', None)
+        if not user_id:
+            return jsonify({'code': 0, 'msg': 'Not authenticated', 'data': None}), 401
+        
+        data = request.get_json() or {}
+        
+        # Validate channels
+        valid_channels = ['browser', 'email', 'telegram', 'discord', 'webhook', 'phone']
+        default_channels = data.get('default_channels', [])
+        if not isinstance(default_channels, list):
+            default_channels = ['browser']
+        default_channels = [c for c in default_channels if c in valid_channels]
+        if not default_channels:
+            default_channels = ['browser']
+        
+        # Build settings object
+        settings = {
+            'default_channels': default_channels,
+            'telegram_bot_token': str(data.get('telegram_bot_token') or '').strip(),
+            'telegram_chat_id': str(data.get('telegram_chat_id') or '').strip(),
+            'email': str(data.get('email') or '').strip(),
+            'discord_webhook': str(data.get('discord_webhook') or '').strip(),
+            'webhook_url': str(data.get('webhook_url') or '').strip(),
+            'phone': str(data.get('phone') or '').strip(),
+        }
+        
+        # Remove empty values (but keep default_channels and telegram_bot_token even if partially filled)
+        settings = {k: v for k, v in settings.items() if v or k == 'default_channels'}
+        
+        settings_json = json.dumps(settings, ensure_ascii=False)
+        
+        with get_db_connection() as db:
+            cur = db.cursor()
+            cur.execute(
+                "UPDATE qd_users SET notification_settings = ?, updated_at = NOW() WHERE id = ?",
+                (settings_json, user_id)
+            )
+            db.commit()
+            cur.close()
+        
+        return jsonify({
+            'code': 1,
+            'msg': 'Notification settings updated',
+            'data': settings
+        })
+    except Exception as e:
+        logger.error(f"update_notification_settings failed: {e}")
         return jsonify({'code': 0, 'msg': str(e), 'data': None}), 500
 
 

@@ -1831,7 +1831,42 @@ const locale = {
   'settings.field.AGENT_MEMORY_W_RECENCY': 'Aktualitätsgewicht',
   'settings.field.AGENT_MEMORY_W_RETURNS': 'Renditegewicht',
   'settings.field.ENABLE_REFLECTION_WORKER': 'Automatische Verifikation aktivieren',
-  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'Verifikationsintervall (Sek.)'
+  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'Verifikationsintervall (Sek.)',
+
+  // Profile - Notification Settings (Benachrichtigungseinstellungen)
+  'profile.notifications.title': 'Benachrichtigungseinstellungen',
+  'profile.notifications.hint': 'Konfigurieren Sie Ihre Standard-Benachrichtigungsmethoden, die automatisch beim Erstellen von Asset-Monitoren und Alarmen verwendet werden',
+  'profile.notifications.defaultChannels': 'Standard-Benachrichtigungskanäle',
+  'profile.notifications.browser': 'In-App-Benachrichtigung',
+  'profile.notifications.email': 'E-Mail',
+  'profile.notifications.phone': 'SMS',
+  'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+  'profile.notifications.telegramBotTokenPlaceholder': 'Geben Sie Ihren Telegram Bot Token ein',
+  'profile.notifications.telegramBotTokenHint': 'Erstellen Sie einen Bot über @BotFather um den Token zu erhalten',
+  'profile.notifications.telegramChatId': 'Telegram Chat ID',
+  'profile.notifications.telegramPlaceholder': 'Geben Sie Ihre Telegram Chat ID ein (z.B. 123456789)',
+  'profile.notifications.telegramHint': 'Senden Sie /start an @userinfobot um Ihre Chat ID zu erhalten',
+  'profile.notifications.notifyEmail': 'Benachrichtigungs-E-Mail',
+  'profile.notifications.emailPlaceholder': 'E-Mail-Adresse für Benachrichtigungen',
+  'profile.notifications.emailHint': 'Verwendet standardmäßig die Konto-E-Mail, Sie können eine andere festlegen',
+  'profile.notifications.phonePlaceholder': 'Telefonnummer eingeben (z.B. +49151234567)',
+  'profile.notifications.phoneHint': 'Administrator muss Twilio-Dienst konfigurieren',
+  'profile.notifications.discordWebhook': 'Discord Webhook',
+  'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+  'profile.notifications.discordHint': 'Erstellen Sie einen Webhook in den Discord-Servereinstellungen',
+  'profile.notifications.webhookUrl': 'Webhook URL',
+  'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+  'profile.notifications.webhookHint': 'Benutzerdefinierte Webhook-URL, Benachrichtigungen per POST JSON',
+  'profile.notifications.webhookToken': 'Webhook Token (Optional)',
+  'profile.notifications.webhookTokenPlaceholder': 'Bearer Token zur Anfrage-Authentifizierung',
+  'profile.notifications.webhookTokenHint': 'Wird als Authorization: Bearer Token an Webhook gesendet',
+  'profile.notifications.testBtn': 'Testbenachrichtigung senden',
+  'profile.notifications.saveSuccess': 'Benachrichtigungseinstellungen gespeichert',
+  'profile.notifications.selectChannel': 'Bitte wählen Sie mindestens einen Benachrichtigungskanal',
+  'profile.notifications.fillTelegramToken': 'Bitte Telegram Bot Token eingeben',
+  'profile.notifications.fillTelegram': 'Bitte Telegram Chat ID eingeben',
+  'profile.notifications.fillEmail': 'Bitte Benachrichtigungs-E-Mail eingeben',
+  'profile.notifications.testSent': 'Testbenachrichtigung gesendet, bitte Benachrichtigungskanäle überprüfen'
 }
 
 export default {

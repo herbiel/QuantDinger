@@ -11,7 +11,7 @@
       v-bind="settings"
     >
 
-      <template v-slot:menuHeaderRender>
+      <template #menuHeaderRender>
         <div>
           <img src="~@/assets/slogo.png" />
           <h1>{{ title }}</h1>
@@ -20,7 +20,7 @@
       <!-- 1.0.0+ 版本 pro-layout 提供 API,
           增加 Header 左侧内容区自定义
     -->
-      <template v-slot:headerContentRender>
+      <template #headerContentRender>
         <div>
           <a-tooltip :title="$t('menu.header.refreshPage')">
             <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="handleRefresh" />
@@ -53,11 +53,11 @@
           This is SettingDrawer custom footer content.
         </div>
       </setting-drawer>
-      <template v-slot:rightContentRender>
+      <template #rightContentRender>
         <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
       </template>
       <!-- custom footer removed -->
-      <template v-slot:footerRender>
+      <template #footerRender>
         <div style="display: none;"></div>
       </template>
       <router-view :key="refreshKey" />

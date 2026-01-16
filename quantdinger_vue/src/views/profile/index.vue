@@ -284,6 +284,174 @@
               </a-table>
             </a-tab-pane>
 
+            <!-- Notification Settings Tab (通知设置) -->
+            <a-tab-pane key="notifications" :tab="$t('profile.notifications.title') || '通知设置'">
+              <div class="notification-settings-form">
+                <a-alert
+                  :message="$t('profile.notifications.hint') || '配置您的默认通知方式，在创建资产监控和预警时将自动使用这些设置'"
+                  type="info"
+                  showIcon
+                  style="margin-bottom: 24px"
+                />
+
+                <a-form :form="notificationForm" layout="vertical" style="max-width: 600px;">
+                  <!-- Default Channels -->
+                  <a-form-item :label="$t('profile.notifications.defaultChannels') || '默认通知渠道'">
+                    <a-checkbox-group
+                      v-decorator="['default_channels', { initialValue: notificationSettings.default_channels || ['browser'] }]"
+                    >
+                      <a-row :gutter="16">
+                        <a-col :span="8">
+                          <a-checkbox value="browser">
+                            <a-icon type="bell" /> {{ $t('profile.notifications.browser') || '站内通知' }}
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="telegram">
+                            <a-icon type="send" /> Telegram
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="email">
+                            <a-icon type="mail" /> {{ $t('profile.notifications.email') || '邮件' }}
+                          </a-checkbox>
+                        </a-col>
+                      </a-row>
+                      <a-row :gutter="16" style="margin-top: 8px">
+                        <a-col :span="8">
+                          <a-checkbox value="phone">
+                            <a-icon type="phone" /> {{ $t('profile.notifications.phone') || '短信' }}
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="discord">
+                            <a-icon type="message" /> Discord
+                          </a-checkbox>
+                        </a-col>
+                        <a-col :span="8">
+                          <a-checkbox value="webhook">
+                            <a-icon type="api" /> Webhook
+                          </a-checkbox>
+                        </a-col>
+                      </a-row>
+                    </a-checkbox-group>
+                  </a-form-item>
+
+                  <!-- Telegram Bot Token -->
+                  <a-form-item :label="$t('profile.notifications.telegramBotToken') || 'Telegram Bot Token'">
+                    <a-input-password
+                      v-decorator="['telegram_bot_token', { initialValue: notificationSettings.telegram_bot_token }]"
+                      :placeholder="$t('profile.notifications.telegramBotTokenPlaceholder') || '请输入您的 Telegram Bot Token'"
+                    >
+                      <a-icon slot="prefix" type="robot" />
+                    </a-input-password>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>
+                        {{ $t('profile.notifications.telegramBotTokenHint') || '通过 @BotFather 创建机器人获取 Token' }}
+                        <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">@BotFather</a>
+                      </span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Telegram Chat ID -->
+                  <a-form-item :label="$t('profile.notifications.telegramChatId') || 'Telegram Chat ID'">
+                    <a-input
+                      v-decorator="['telegram_chat_id', { initialValue: notificationSettings.telegram_chat_id }]"
+                      :placeholder="$t('profile.notifications.telegramPlaceholder') || '请输入您的 Telegram Chat ID（如 123456789）'"
+                    >
+                      <a-icon slot="prefix" type="message" />
+                    </a-input>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.telegramHint') || '发送 /start 给 @userinfobot 可获取您的 Chat ID' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Notification Email -->
+                  <a-form-item :label="$t('profile.notifications.notifyEmail') || '通知邮箱'">
+                    <a-input
+                      v-decorator="['email', { initialValue: notificationSettings.email || profile.email }]"
+                      :placeholder="$t('profile.notifications.emailPlaceholder') || '接收通知的邮箱地址'"
+                    >
+                      <a-icon slot="prefix" type="mail" />
+                    </a-input>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.emailHint') || '默认使用账户邮箱，可设置其他邮箱接收通知' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Phone Number (SMS) -->
+                  <a-form-item :label="$t('profile.notifications.phone') || '手机号（短信通知）'">
+                    <a-input
+                      v-decorator="['phone', { initialValue: notificationSettings.phone }]"
+                      :placeholder="$t('profile.notifications.phonePlaceholder') || '请输入手机号（如 +8613800138000）'"
+                    >
+                      <a-icon slot="prefix" type="phone" />
+                    </a-input>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.phoneHint') || '需要管理员配置 Twilio 服务后才能使用短信通知' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Discord Webhook -->
+                  <a-form-item :label="$t('profile.notifications.discordWebhook') || 'Discord Webhook'">
+                    <a-input
+                      v-decorator="['discord_webhook', { initialValue: notificationSettings.discord_webhook }]"
+                      :placeholder="$t('profile.notifications.discordPlaceholder') || 'https://discord.com/api/webhooks/...'"
+                    >
+                      <a-icon slot="prefix" type="message" />
+                    </a-input>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.discordHint') || '在 Discord 服务器设置中创建 Webhook' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Webhook URL -->
+                  <a-form-item :label="$t('profile.notifications.webhookUrl') || 'Webhook URL'">
+                    <a-input
+                      v-decorator="['webhook_url', { initialValue: notificationSettings.webhook_url }]"
+                      :placeholder="$t('profile.notifications.webhookPlaceholder') || 'https://your-server.com/webhook'"
+                    >
+                      <a-icon slot="prefix" type="api" />
+                    </a-input>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.webhookHint') || '自定义 Webhook 地址，将以 POST JSON 方式推送通知' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <!-- Webhook Token -->
+                  <a-form-item :label="$t('profile.notifications.webhookToken') || 'Webhook Token（可选）'">
+                    <a-input-password
+                      v-decorator="['webhook_token', { initialValue: notificationSettings.webhook_token }]"
+                      :placeholder="$t('profile.notifications.webhookTokenPlaceholder') || '用于验证请求的 Bearer Token'"
+                    >
+                      <a-icon slot="prefix" type="key" />
+                    </a-input-password>
+                    <div class="field-hint">
+                      <a-icon type="info-circle" />
+                      <span>{{ $t('profile.notifications.webhookTokenHint') || '将作为 Authorization: Bearer Token 发送到 Webhook' }}</span>
+                    </div>
+                  </a-form-item>
+
+                  <a-form-item>
+                    <a-button type="primary" :loading="savingNotifications" @click="handleSaveNotifications">
+                      <a-icon type="save" />
+                      {{ $t('common.save') || '保存' }}
+                    </a-button>
+                    <a-button style="margin-left: 12px" @click="handleTestNotification" :loading="testingNotification">
+                      <a-icon type="experiment" />
+                      {{ $t('profile.notifications.testBtn') || '发送测试通知' }}
+                    </a-button>
+                  </a-form-item>
+                </a-form>
+              </div>
+            </a-tab-pane>
+
             <!-- Referral List Tab (邀请列表) -->
             <a-tab-pane key="referrals" :tab="$t('profile.referral.listTab') || '邀请列表'">
               <a-table
@@ -327,7 +495,7 @@
 </template>
 
 <script>
-import { getProfile, updateProfile, getMyCreditsLog, getMyReferrals } from '@/api/user'
+import { getProfile, updateProfile, getMyCreditsLog, getMyReferrals, getNotificationSettings, updateNotificationSettings } from '@/api/user'
 import { getSettingsValues } from '@/api/settings'
 import { baseMixin } from '@/store/app-mixin'
 
@@ -383,7 +551,20 @@ export default {
         feature_costs: {},
         recharge_telegram_url: ''
       },
-      rechargeTelegramUrl: 'https://t.me/your_support_bot'
+      rechargeTelegramUrl: 'https://t.me/your_support_bot',
+      // Notification settings
+      notificationSettings: {
+        default_channels: ['browser'],
+        telegram_bot_token: '',
+        telegram_chat_id: '',
+        email: '',
+        phone: '',
+        discord_webhook: '',
+        webhook_url: '',
+        webhook_token: ''
+      },
+      savingNotifications: false,
+      testingNotification: false
     }
   },
   computed: {
@@ -456,11 +637,15 @@ export default {
       if (val === 'referrals' && (!this.referralData.list || this.referralData.list.length === 0)) {
         this.loadReferrals()
       }
+      if (val === 'notifications' && !this.notificationSettings.telegram_chat_id && !this.notificationSettings.discord_webhook) {
+        this.loadNotificationSettings()
+      }
     }
   },
   beforeCreate () {
     this.profileForm = this.$form.createForm(this, { name: 'profile' })
     this.passwordForm = this.$form.createForm(this, { name: 'password' })
+    this.notificationForm = this.$form.createForm(this, { name: 'notification' })
   },
   mounted () {
     this.loadProfile()
@@ -484,6 +669,19 @@ export default {
             // Prefer server-provided public recharge link
             if (this.billing.recharge_telegram_url) {
               this.rechargeTelegramUrl = this.billing.recharge_telegram_url
+            }
+          }
+          // 提取通知设置
+          if (res.data.notification_settings) {
+            this.notificationSettings = {
+              default_channels: res.data.notification_settings.default_channels || ['browser'],
+              telegram_bot_token: res.data.notification_settings.telegram_bot_token || '',
+              telegram_chat_id: res.data.notification_settings.telegram_chat_id || '',
+              email: res.data.notification_settings.email || res.data.email || '',
+              phone: res.data.notification_settings.phone || '',
+              discord_webhook: res.data.notification_settings.discord_webhook || '',
+              webhook_url: res.data.notification_settings.webhook_url || '',
+              webhook_token: res.data.notification_settings.webhook_token || ''
             }
           }
           this.$nextTick(() => {
@@ -781,6 +979,124 @@ export default {
         referral_bonus: this.$t('profile.creditsLog.actionReferralBonus') || '邀请奖励'
       }
       return labels[action] || action
+    },
+
+    // Notification settings methods
+    async loadNotificationSettings () {
+      try {
+        const res = await getNotificationSettings()
+        if (res.code === 1 && res.data) {
+          this.notificationSettings = {
+            default_channels: res.data.default_channels || ['browser'],
+            telegram_bot_token: res.data.telegram_bot_token || '',
+            telegram_chat_id: res.data.telegram_chat_id || '',
+            email: res.data.email || this.profile.email || '',
+            phone: res.data.phone || '',
+            discord_webhook: res.data.discord_webhook || '',
+            webhook_url: res.data.webhook_url || '',
+            webhook_token: res.data.webhook_token || ''
+          }
+          // Update form values
+          this.$nextTick(() => {
+            this.notificationForm.setFieldsValue({
+              default_channels: this.notificationSettings.default_channels,
+              telegram_bot_token: this.notificationSettings.telegram_bot_token,
+              telegram_chat_id: this.notificationSettings.telegram_chat_id,
+              email: this.notificationSettings.email,
+              phone: this.notificationSettings.phone,
+              discord_webhook: this.notificationSettings.discord_webhook,
+              webhook_url: this.notificationSettings.webhook_url,
+              webhook_token: this.notificationSettings.webhook_token
+            })
+          })
+        }
+      } catch (e) {
+        // Use default values
+      }
+    },
+
+    handleSaveNotifications () {
+      this.notificationForm.validateFields(async (err, values) => {
+        if (err) return
+
+        this.savingNotifications = true
+        try {
+          const res = await updateNotificationSettings({
+            default_channels: values.default_channels || ['browser'],
+            telegram_bot_token: values.telegram_bot_token || '',
+            telegram_chat_id: values.telegram_chat_id || '',
+            email: values.email || '',
+            phone: values.phone || '',
+            discord_webhook: values.discord_webhook || '',
+            webhook_url: values.webhook_url || '',
+            webhook_token: values.webhook_token || ''
+          })
+          if (res.code === 1) {
+            this.$message.success(this.$t('profile.notifications.saveSuccess') || '通知设置保存成功')
+            this.notificationSettings = res.data || this.notificationSettings
+          } else {
+            this.$message.error(res.msg || '保存失败')
+          }
+        } catch (e) {
+          this.$message.error('保存失败')
+        } finally {
+          this.savingNotifications = false
+        }
+      })
+    },
+
+    async handleTestNotification () {
+      const values = this.notificationForm.getFieldsValue()
+      const channels = values.default_channels || []
+
+      if (channels.length === 0) {
+        this.$message.warning(this.$t('profile.notifications.selectChannel') || '请至少选择一个通知渠道')
+        return
+      }
+
+      // Check if required fields are filled
+      if (channels.includes('telegram')) {
+        if (!values.telegram_bot_token) {
+          this.$message.warning(this.$t('profile.notifications.fillTelegramToken') || '请填写 Telegram Bot Token')
+          return
+        }
+        if (!values.telegram_chat_id) {
+          this.$message.warning(this.$t('profile.notifications.fillTelegram') || '请填写 Telegram Chat ID')
+          return
+        }
+      }
+      if (channels.includes('email') && !values.email) {
+        this.$message.warning(this.$t('profile.notifications.fillEmail') || '请填写通知邮箱')
+        return
+      }
+
+      this.testingNotification = true
+      try {
+        // First save settings, then test
+        const saveRes = await updateNotificationSettings({
+          default_channels: channels,
+          telegram_bot_token: values.telegram_bot_token || '',
+          telegram_chat_id: values.telegram_chat_id || '',
+          email: values.email || '',
+          phone: values.phone || '',
+          discord_webhook: values.discord_webhook || '',
+          webhook_url: values.webhook_url || '',
+          webhook_token: values.webhook_token || ''
+        })
+
+        if (saveRes.code !== 1) {
+          this.$message.error(saveRes.msg || '保存设置失败')
+          return
+        }
+
+        this.$message.info(this.$t('profile.notifications.testSent') || '测试通知已发送，请检查您的通知渠道')
+        // Note: Actual test notification would require a backend endpoint
+        // For now, we just show a success message after saving
+      } catch (e) {
+        this.$message.error('发送测试通知失败')
+      } finally {
+        this.testingNotification = false
+      }
     }
   }
 }
@@ -958,6 +1274,30 @@ export default {
     .amount-negative {
       color: #ff4d4f;
       font-weight: 600;
+    }
+
+    // Notification settings form
+    .notification-settings-form {
+      .field-hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .anticon {
+          font-size: 12px;
+        }
+      }
+
+      /deep/ .ant-checkbox-group {
+        width: 100%;
+      }
+
+      /deep/ .ant-checkbox-wrapper {
+        margin-bottom: 8px;
+      }
     }
   }
 

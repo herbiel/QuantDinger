@@ -71,10 +71,6 @@ def load_addon_config() -> Dict[str, Any]:
         ('OPENROUTER_CONNECT_TIMEOUT', 'openrouter.connect_timeout', 'int'),
         ('AI_MODELS_JSON', 'ai.models', 'json'),
 
-        # Market
-        ('MARKET_TYPES_JSON', 'market.types', 'json'),
-        ('TRADING_SUPPORTED_SYMBOLS_JSON', 'trading.supported_symbols', 'json'),
-
         # App
         ('CORS_ORIGINS', 'app.cors_origins', 'string'),
         ('RATE_LIMIT', 'app.rate_limit', 'int'),

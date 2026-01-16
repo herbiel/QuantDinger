@@ -892,63 +892,28 @@
                 >
                   <a-checkbox value="browser">{{ $t('trading-assistant.notify.browser') }}</a-checkbox>
                   <a-checkbox value="email">{{ $t('trading-assistant.notify.email') }}</a-checkbox>
-                  <a-checkbox value="phone">{{ $t('trading-assistant.notify.phone') }}</a-checkbox>
                   <a-checkbox value="telegram">{{ $t('trading-assistant.notify.telegram') }}</a-checkbox>
                   <a-checkbox value="discord">{{ $t('trading-assistant.notify.discord') }}</a-checkbox>
-                  <a-checkbox value="webhook">{{ $t('trading-assistant.notify.webhook') }}</a-checkbox>
                 </a-checkbox-group>
                 <div class="form-item-hint">{{ $t('trading-assistant.form.notifyChannelsHint') }}</div>
               </a-form-item>
 
-              <a-form-item
-                v-if="notifyChannelsUi.includes('email')"
-                :label="$t('trading-assistant.form.notifyEmail')"
+              <!-- Notification settings hint -->
+              <a-alert
+                v-if="notifyChannelsUi.includes('telegram') || notifyChannelsUi.includes('email') || notifyChannelsUi.includes('discord')"
+                type="info"
+                showIcon
+                style="margin-bottom: 16px"
               >
-                <a-input
-                  v-decorator="['notify_email', { rules: [{ type: 'email', message: $t('trading-assistant.validation.emailInvalid') }] }]"
-                  :placeholder="$t('trading-assistant.placeholders.inputEmail')"
-                />
-              </a-form-item>
-
-              <a-form-item
-                v-if="notifyChannelsUi.includes('phone')"
-                :label="$t('trading-assistant.form.notifyPhone')"
-              >
-                <a-input
-                  v-decorator="['notify_phone']"
-                  :placeholder="$t('trading-assistant.placeholders.inputPhone')"
-                />
-              </a-form-item>
-
-              <a-form-item
-                v-if="notifyChannelsUi.includes('telegram')"
-                :label="$t('trading-assistant.form.notifyTelegram')"
-              >
-                <a-input
-                  v-decorator="['notify_telegram']"
-                  :placeholder="$t('trading-assistant.placeholders.inputTelegram')"
-                />
-              </a-form-item>
-
-              <a-form-item
-                v-if="notifyChannelsUi.includes('discord')"
-                :label="$t('trading-assistant.form.notifyDiscord')"
-              >
-                <a-input
-                  v-decorator="['notify_discord']"
-                  :placeholder="$t('trading-assistant.placeholders.inputDiscord')"
-                />
-              </a-form-item>
-
-              <a-form-item
-                v-if="notifyChannelsUi.includes('webhook')"
-                :label="$t('trading-assistant.form.notifyWebhook')"
-              >
-                <a-input
-                  v-decorator="['notify_webhook']"
-                  :placeholder="$t('trading-assistant.placeholders.inputWebhook')"
-                />
-              </a-form-item>
+                <template #message>
+                  <span>
+                    {{ $t('trading-assistant.form.notificationFromProfile') || '通知将发送到您在个人中心配置的地址' }}
+                    <router-link to="/profile" style="margin-left: 8px">
+                      <a-icon type="setting" /> {{ $t('trading-assistant.form.goToProfile') || '前往配置' }}
+                    </router-link>
+                  </span>
+                </template>
+              </a-alert>
 
               <a-divider v-if="executionModeUi === 'live' && canUseLiveTrading" />
 
@@ -1267,6 +1232,7 @@
 import { getStrategyList, startStrategy, stopStrategy, deleteStrategy, updateStrategy, testExchangeConnection, getStrategyEquityCurve, batchCreateStrategies, batchStartStrategies, batchStopStrategies, batchDeleteStrategies } from '@/api/strategy'
 import { getWatchlist } from '@/api/market'
 import { listExchangeCredentials, getExchangeCredential, createExchangeCredential } from '@/api/credentials'
+import { getNotificationSettings } from '@/api/user'
 import { baseMixin } from '@/store/app-mixin'
 import request from '@/utils/request'
 import TradingRecords from './components/TradingRecords.vue'
@@ -1563,6 +1529,17 @@ export default {
       supportedIPs: [], // 白名单IP列表
       executionModeUi: 'signal',
       notifyChannelsUi: ['browser'],
+      // User's notification settings from profile
+      userNotificationSettings: {
+        default_channels: ['browser'],
+        telegram_bot_token: '',
+        telegram_chat_id: '',
+        email: '',
+        phone: '',
+        discord_webhook: '',
+        webhook_url: '',
+        webhook_token: ''
+      },
       // Exchange credentials vault
       loadingExchangeCredentials: false,
       exchangeCredentials: [],
@@ -1580,11 +1557,32 @@ export default {
   },
   mounted () {
     this.loadStrategies()
+    this.loadUserNotificationSettings()
   },
   beforeDestroy () {
     this.stopEquityPolling()
   },
   methods: {
+    async loadUserNotificationSettings () {
+      // Load user's default notification settings from profile
+      try {
+        const res = await getNotificationSettings()
+        if (res.code === 1 && res.data) {
+          this.userNotificationSettings = {
+            default_channels: res.data.default_channels || ['browser'],
+            telegram_bot_token: res.data.telegram_bot_token || '',
+            telegram_chat_id: res.data.telegram_chat_id || '',
+            email: res.data.email || '',
+            phone: res.data.phone || '',
+            discord_webhook: res.data.discord_webhook || '',
+            webhook_url: res.data.webhook_url || '',
+            webhook_token: res.data.webhook_token || ''
+          }
+        }
+      } catch (e) {
+        // Silently fail, use default values
+      }
+    },
     async loadWatchlist () {
       this.loadingWatchlist = true
       try {
@@ -2965,14 +2963,17 @@ export default {
               }
             }
 
+            // Use user's notification settings from profile for targets
             const notificationConfig = {
               channels: values.notify_channels || [],
               targets: {
-                email: values.notify_email || '',
-                phone: values.notify_phone || '',
-                telegram: values.notify_telegram || '',
-                discord: values.notify_discord || '',
-                webhook: values.notify_webhook || ''
+                email: this.userNotificationSettings.email || '',
+                phone: this.userNotificationSettings.phone || '',
+                telegram: this.userNotificationSettings.telegram_chat_id || '',
+                telegram_bot_token: this.userNotificationSettings.telegram_bot_token || '',
+                discord: this.userNotificationSettings.discord_webhook || '',
+                webhook: this.userNotificationSettings.webhook_url || '',
+                webhook_token: this.userNotificationSettings.webhook_token || ''
               }
             }
             if (!notificationConfig.channels || notificationConfig.channels.length === 0) {

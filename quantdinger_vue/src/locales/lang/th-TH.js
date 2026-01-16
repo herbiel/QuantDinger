@@ -1782,7 +1782,42 @@ const locale = {
   'settings.field.AGENT_MEMORY_W_RECENCY': 'ค่าน้ำหนักเวลา',
   'settings.field.AGENT_MEMORY_W_RETURNS': 'ค่าน้ำหนักผลตอบแทน',
   'settings.field.ENABLE_REFLECTION_WORKER': 'เปิดใช้การตรวจสอบอัตโนมัติ',
-  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'ช่วงเวลาตรวจสอบ (วินาที)'
+  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'ช่วงเวลาตรวจสอบ (วินาที)',
+
+  // Profile - Notification Settings (การตั้งค่าการแจ้งเตือน)
+  'profile.notifications.title': 'การตั้งค่าการแจ้งเตือน',
+  'profile.notifications.hint': 'กำหนดค่าวิธีการแจ้งเตือนเริ่มต้น จะถูกใช้โดยอัตโนมัติเมื่อสร้างการติดตามสินทรัพย์และการแจ้งเตือน',
+  'profile.notifications.defaultChannels': 'ช่องทางแจ้งเตือนเริ่มต้น',
+  'profile.notifications.browser': 'การแจ้งเตือนในแอป',
+  'profile.notifications.email': 'อีเมล',
+  'profile.notifications.phone': 'SMS',
+  'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+  'profile.notifications.telegramBotTokenPlaceholder': 'กรอก Telegram Bot Token ของคุณ',
+  'profile.notifications.telegramBotTokenHint': 'สร้างบอทผ่าน @BotFather เพื่อรับ Token',
+  'profile.notifications.telegramChatId': 'Telegram Chat ID',
+  'profile.notifications.telegramPlaceholder': 'กรอก Telegram Chat ID ของคุณ (เช่น 123456789)',
+  'profile.notifications.telegramHint': 'ส่ง /start ไปที่ @userinfobot เพื่อรับ Chat ID',
+  'profile.notifications.notifyEmail': 'อีเมลแจ้งเตือน',
+  'profile.notifications.emailPlaceholder': 'ที่อยู่อีเมลสำหรับรับการแจ้งเตือน',
+  'profile.notifications.emailHint': 'ใช้อีเมลบัญชีเป็นค่าเริ่มต้น สามารถตั้งค่าอีเมลอื่นได้',
+  'profile.notifications.phonePlaceholder': 'กรอกหมายเลขโทรศัพท์ (เช่น +66812345678)',
+  'profile.notifications.phoneHint': 'ผู้ดูแลระบบต้องกำหนดค่าบริการ Twilio',
+  'profile.notifications.discordWebhook': 'Discord Webhook',
+  'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+  'profile.notifications.discordHint': 'สร้าง Webhook ในการตั้งค่าเซิร์ฟเวอร์ Discord',
+  'profile.notifications.webhookUrl': 'Webhook URL',
+  'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+  'profile.notifications.webhookHint': 'URL Webhook แบบกำหนดเอง ส่งการแจ้งเตือนผ่าน POST JSON',
+  'profile.notifications.webhookToken': 'Webhook Token (ไม่บังคับ)',
+  'profile.notifications.webhookTokenPlaceholder': 'Bearer Token สำหรับยืนยันตัวตนคำขอ',
+  'profile.notifications.webhookTokenHint': 'ส่งเป็น Authorization: Bearer Token ไปยัง Webhook',
+  'profile.notifications.testBtn': 'ส่งการแจ้งเตือนทดสอบ',
+  'profile.notifications.saveSuccess': 'บันทึกการตั้งค่าการแจ้งเตือนสำเร็จ',
+  'profile.notifications.selectChannel': 'กรุณาเลือกอย่างน้อยหนึ่งช่องทางแจ้งเตือน',
+  'profile.notifications.fillTelegramToken': 'กรุณากรอก Telegram Bot Token',
+  'profile.notifications.fillTelegram': 'กรุณากรอก Telegram Chat ID',
+  'profile.notifications.fillEmail': 'กรุณากรอกอีเมลแจ้งเตือน',
+  'profile.notifications.testSent': 'ส่งการแจ้งเตือนทดสอบแล้ว กรุณาตรวจสอบช่องทางแจ้งเตือนของคุณ'
 }
 
 export default {

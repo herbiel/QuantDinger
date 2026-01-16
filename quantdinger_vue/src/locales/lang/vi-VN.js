@@ -2915,7 +2915,42 @@ const locale = {
 'settings.field.AGENT_MEMORY_W_RECENCY': 'Trọng số thời gian',
 'settings.field.AGENT_MEMORY_W_RETURNS': 'Trọng số lợi nhuận',
 'settings.field.ENABLE_REFLECTION_WORKER': 'Bật xác minh tự động',
-'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'Khoảng thời gian xác minh (giây)'
+'settings.field.REFLECTION_WORKER_INTERVAL_SEC': 'Khoảng thời gian xác minh (giây)',
+
+// Profile - Notification Settings (Cài đặt thông báo)
+'profile.notifications.title': 'Cài đặt thông báo',
+'profile.notifications.hint': 'Cấu hình phương thức thông báo mặc định, sẽ được sử dụng tự động khi tạo giám sát tài sản và cảnh báo',
+'profile.notifications.defaultChannels': 'Kênh thông báo mặc định',
+'profile.notifications.browser': 'Thông báo trong ứng dụng',
+'profile.notifications.email': 'Email',
+'profile.notifications.phone': 'SMS',
+'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+'profile.notifications.telegramBotTokenPlaceholder': 'Nhập Telegram Bot Token của bạn',
+'profile.notifications.telegramBotTokenHint': 'Tạo bot qua @BotFather để lấy Token',
+'profile.notifications.telegramChatId': 'Telegram Chat ID',
+'profile.notifications.telegramPlaceholder': 'Nhập Telegram Chat ID của bạn (ví dụ: 123456789)',
+'profile.notifications.telegramHint': 'Gửi /start cho @userinfobot để lấy Chat ID',
+'profile.notifications.notifyEmail': 'Email thông báo',
+'profile.notifications.emailPlaceholder': 'Địa chỉ email nhận thông báo',
+'profile.notifications.emailHint': 'Mặc định sử dụng email tài khoản, có thể đặt email khác',
+'profile.notifications.phonePlaceholder': 'Nhập số điện thoại (ví dụ: +84123456789)',
+'profile.notifications.phoneHint': 'Cần quản trị viên cấu hình dịch vụ Twilio',
+'profile.notifications.discordWebhook': 'Discord Webhook',
+'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+'profile.notifications.discordHint': 'Tạo Webhook trong cài đặt máy chủ Discord',
+'profile.notifications.webhookUrl': 'Webhook URL',
+'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+'profile.notifications.webhookHint': 'URL Webhook tùy chỉnh, gửi thông báo qua POST JSON',
+'profile.notifications.webhookToken': 'Webhook Token (Tùy chọn)',
+'profile.notifications.webhookTokenPlaceholder': 'Bearer Token để xác thực yêu cầu',
+'profile.notifications.webhookTokenHint': 'Gửi dưới dạng Authorization: Bearer Token đến Webhook',
+'profile.notifications.testBtn': 'Gửi thông báo thử nghiệm',
+'profile.notifications.saveSuccess': 'Đã lưu cài đặt thông báo thành công',
+'profile.notifications.selectChannel': 'Vui lòng chọn ít nhất một kênh thông báo',
+'profile.notifications.fillTelegramToken': 'Vui lòng điền Telegram Bot Token',
+'profile.notifications.fillTelegram': 'Vui lòng điền Telegram Chat ID',
+'profile.notifications.fillEmail': 'Vui lòng điền email thông báo',
+'profile.notifications.testSent': 'Đã gửi thông báo thử nghiệm, vui lòng kiểm tra các kênh thông báo'
 
 }
 export default {

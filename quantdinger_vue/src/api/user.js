@@ -126,6 +126,28 @@ export function changePassword (data) {
 }
 
 /**
+ * Get current user's notification settings
+ */
+export function getNotificationSettings () {
+  return request({
+    url: '/api/users/notification-settings',
+    method: 'get'
+  })
+}
+
+/**
+ * Update current user's notification settings
+ * @param {Object} data - { default_channels, telegram_chat_id, email, discord_webhook, webhook_url, phone }
+ */
+export function updateNotificationSettings (data) {
+  return request({
+    url: '/api/users/notification-settings',
+    method: 'put',
+    data
+  })
+}
+
+/**
  * Get current user's credits log
  * @param {Object} params - { page, page_size }
  */

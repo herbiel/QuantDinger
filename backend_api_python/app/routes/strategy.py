@@ -471,7 +471,13 @@ def get_equity_curve():
                 equity += float(r.get('profit') or 0)
             except Exception:
                 pass
-            ts = int(r.get('created_at').timestamp() or time.time())
+            created_at = r.get('created_at')
+            if created_at and hasattr(created_at, 'timestamp'):
+                ts = int(created_at.timestamp())
+            elif created_at:
+                ts = int(created_at)
+            else:
+                ts = int(time.time())
             curve.append({'time': ts, 'equity': equity})
 
         return jsonify({'code': 1, 'msg': 'success', 'data': curve})

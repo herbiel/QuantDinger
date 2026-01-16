@@ -228,22 +228,6 @@ CONFIG_SCHEMA = {
                 'default': '10',
                 'description': 'Time-to-live for cached price data in seconds'
             },
-            {
-                'key': 'MARKET_TYPES_JSON',
-                'label': 'Market Types (JSON)',
-                'type': 'text',
-                'default': '[]',
-                'required': False,
-                'description': 'Custom market type definitions in JSON format'
-            },
-            {
-                'key': 'TRADING_SUPPORTED_SYMBOLS_JSON',
-                'label': 'Supported Symbols (JSON)',
-                'type': 'text',
-                'default': '[]',
-                'required': False,
-                'description': 'List of supported trading symbols in JSON format'
-            },
         ]
     },
 
@@ -353,50 +337,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 7. 通知推送 ====================
-    'notification': {
-        'title': 'Notifications',
-        'icon': 'notification',
-        'order': 7,
-        'items': [
-            {
-                'key': 'SIGNAL_WEBHOOK_URL',
-                'label': 'Webhook URL',
-                'type': 'text',
-                'required': False,
-                'description': 'Custom webhook URL for signal notifications (POST JSON)'
-            },
-            {
-                'key': 'SIGNAL_WEBHOOK_TOKEN',
-                'label': 'Webhook Token',
-                'type': 'password',
-                'required': False,
-                'description': 'Authentication token sent in webhook header'
-            },
-            {
-                'key': 'SIGNAL_NOTIFY_TIMEOUT_SEC',
-                'label': 'Notify Timeout (sec)',
-                'type': 'number',
-                'default': '6',
-                'description': 'Notification request timeout'
-            },
-            {
-                'key': 'TELEGRAM_BOT_TOKEN',
-                'label': 'Telegram Bot Token',
-                'type': 'password',
-                'required': False,
-                'link': 'https://t.me/BotFather',
-                'link_text': 'settings.link.createBot',
-                'description': 'Telegram bot token from @BotFather for signal notifications'
-            },
-        ]
-    },
-
-    # ==================== 8. 邮件配置 ====================
+    # ==================== 7. 邮件配置 (公共 SMTP) ====================
     'email': {
         'title': 'Email (SMTP)',
         'icon': 'mail',
-        'order': 8,
+        'order': 7,
         'items': [
             {
                 'key': 'SMTP_HOST',
@@ -454,7 +399,7 @@ CONFIG_SCHEMA = {
     'sms': {
         'title': 'SMS (Twilio)',
         'icon': 'phone',
-        'order': 9,
+        'order': 8,
         'items': [
             {
                 'key': 'TWILIO_ACCOUNT_SID',
@@ -482,11 +427,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 10. AI Agent 配置 ====================
+    # ==================== 9. AI Agent 配置 ====================
     'agent': {
         'title': 'AI Agent',
         'icon': 'experiment',
-        'order': 10,
+        'order': 9,
         'items': [
             {
                 'key': 'ENABLE_AGENT_MEMORY',
@@ -568,11 +513,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 11. 网络代理 ====================
+    # ==================== 10. 网络代理 ====================
     'network': {
         'title': 'Network & Proxy',
         'icon': 'global',
-        'order': 11,
+        'order': 10,
         'items': [
             {
                 'key': 'PROXY_HOST',
@@ -606,11 +551,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 12. 搜索配置 ====================
+    # ==================== 11. 搜索配置 ====================
     'search': {
         'title': 'Web Search',
         'icon': 'search',
-        'order': 12,
+        'order': 11,
         'items': [
             {
                 'key': 'SEARCH_PROVIDER',
@@ -664,11 +609,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 13. 注册与安全 ====================
+    # ==================== 12. 注册与安全 ====================
     'security': {
         'title': 'Registration & Security',
         'icon': 'safety',
-        'order': 13,
+        'order': 12,
         'items': [
             {
                 'key': 'ENABLE_REGISTRATION',
@@ -826,11 +771,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 14. 计费配置 ====================
+    # ==================== 13. 计费配置 ====================
     'billing': {
         'title': 'Billing & Credits',
         'icon': 'dollar',
-        'order': 14,
+        'order': 13,
         'items': [
             {
                 'key': 'BILLING_ENABLED',
@@ -898,11 +843,11 @@ CONFIG_SCHEMA = {
         ]
     },
 
-    # ==================== 15. 应用配置 ====================
+    # ==================== 14. 应用配置 ====================
     'app': {
         'title': 'Application',
         'icon': 'appstore',
-        'order': 15,
+        'order': 14,
         'items': [
             {
                 'key': 'CORS_ORIGINS',

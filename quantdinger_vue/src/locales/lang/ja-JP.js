@@ -1786,7 +1786,42 @@ const locale = {
   'settings.field.AGENT_MEMORY_W_RECENCY': '新しさ重み',
   'settings.field.AGENT_MEMORY_W_RETURNS': '収益重み',
   'settings.field.ENABLE_REFLECTION_WORKER': '自動検証を有効化',
-  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': '検証間隔（秒）'
+  'settings.field.REFLECTION_WORKER_INTERVAL_SEC': '検証間隔（秒）',
+
+  // Profile - Notification Settings (通知設定)
+  'profile.notifications.title': '通知設定',
+  'profile.notifications.hint': 'デフォルトの通知方法を設定します。資産モニターやアラート作成時に自動的に使用されます',
+  'profile.notifications.defaultChannels': 'デフォルト通知チャンネル',
+  'profile.notifications.browser': 'アプリ内通知',
+  'profile.notifications.email': 'メール',
+  'profile.notifications.phone': 'SMS',
+  'profile.notifications.telegramBotToken': 'Telegram Bot Token',
+  'profile.notifications.telegramBotTokenPlaceholder': 'Telegram Bot Tokenを入力してください',
+  'profile.notifications.telegramBotTokenHint': '@BotFatherでボットを作成してTokenを取得してください',
+  'profile.notifications.telegramChatId': 'Telegram Chat ID',
+  'profile.notifications.telegramPlaceholder': 'Telegram Chat IDを入力してください（例：123456789）',
+  'profile.notifications.telegramHint': '@userinfobot に /start を送信してChat IDを取得してください',
+  'profile.notifications.notifyEmail': '通知メール',
+  'profile.notifications.emailPlaceholder': '通知を受け取るメールアドレス',
+  'profile.notifications.emailHint': 'デフォルトはアカウントメール、別のメールも設定可能',
+  'profile.notifications.phonePlaceholder': '電話番号を入力してください（例：+81901234567）',
+  'profile.notifications.phoneHint': '管理者がTwilioサービスを設定する必要があります',
+  'profile.notifications.discordWebhook': 'Discord Webhook',
+  'profile.notifications.discordPlaceholder': 'https://discord.com/api/webhooks/...',
+  'profile.notifications.discordHint': 'Discordサーバー設定でWebhookを作成してください',
+  'profile.notifications.webhookUrl': 'Webhook URL',
+  'profile.notifications.webhookPlaceholder': 'https://your-server.com/webhook',
+  'profile.notifications.webhookHint': 'カスタムWebhook URL、POST JSONで通知を送信',
+  'profile.notifications.webhookToken': 'Webhook Token（任意）',
+  'profile.notifications.webhookTokenPlaceholder': 'リクエスト認証用Bearer Token',
+  'profile.notifications.webhookTokenHint': 'Authorization: Bearer TokenとしてWebhookに送信',
+  'profile.notifications.testBtn': 'テスト通知を送信',
+  'profile.notifications.saveSuccess': '通知設定を保存しました',
+  'profile.notifications.selectChannel': '少なくとも1つの通知チャンネルを選択してください',
+  'profile.notifications.fillTelegramToken': 'Telegram Bot Tokenを入力してください',
+  'profile.notifications.fillTelegram': 'Telegram Chat IDを入力してください',
+  'profile.notifications.fillEmail': '通知メールを入力してください',
+  'profile.notifications.testSent': 'テスト通知を送信しました。通知チャンネルを確認してください'
 }
 
 export default {

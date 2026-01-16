@@ -146,19 +146,26 @@ export default {
       if (!time) return '--'
 
       try {
-        // 只处理时间戳格式（数字或字符串数字）
-        if (typeof time !== 'number' && (typeof time !== 'string' || !/^\d+$/.test(time))) {
+        let date
+
+        if (typeof time === 'number') {
+          // 数字类型：判断是秒级还是毫秒级时间戳
+          const timestampMs = time < 1e12 ? time * 1000 : time
+          date = new Date(timestampMs)
+        } else if (typeof time === 'string') {
+          // 字符串类型
+          if (/^\d+$/.test(time)) {
+            // 纯数字字符串（时间戳）
+            const timestamp = parseInt(time, 10)
+            const timestampMs = timestamp < 1e12 ? timestamp * 1000 : timestamp
+            date = new Date(timestampMs)
+          } else {
+            // ISO 日期字符串或其他格式，直接解析
+            date = new Date(time)
+          }
+        } else {
           return '--'
         }
-
-        // 转换为数字
-        const timestamp = typeof time === 'string' ? parseInt(time, 10) : time
-
-        // 判断是秒级还是毫秒级时间戳
-        // 如果时间戳小于 1e12，认为是秒级，需要乘以 1000
-        // 如果大于等于 1e12，认为是毫秒级
-        const timestampMs = timestamp < 1e12 ? timestamp * 1000 : timestamp
-        const date = new Date(timestampMs)
 
         // 检查日期是否有效
         if (isNaN(date.getTime())) {

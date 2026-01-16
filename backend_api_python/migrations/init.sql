@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS qd_users (
     vip_expires_at TIMESTAMP,              -- VIP过期时间
     email_verified BOOLEAN DEFAULT FALSE,  -- 邮箱是否已验证
     referred_by INTEGER,                   -- 邀请人ID
+    notification_settings TEXT DEFAULT '', -- 用户通知配置 JSON (telegram_chat_id, default_channels等)
     last_login_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
