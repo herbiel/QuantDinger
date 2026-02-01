@@ -256,13 +256,6 @@ class LLMService:
         except ImportError:
             raise ImportError("litellm package is not installed. Install with: pip install litellm")
         
-        # Set API key for LiteLLM (it will route to the appropriate provider)
-        # LiteLLM supports environment variables, but we can also pass it directly
-        if api_key:
-            # LiteLLM auto-detects provider from model name (e.g., gpt-4o -> OpenAI)
-            # and uses the appropriate environment variable or passed key
-            os.environ['LITELLM_API_KEY'] = api_key
-        
         try:
             # LiteLLM uses OpenAI's message format natively
             kwargs = {
@@ -271,6 +264,11 @@ class LLMService:
                 "temperature": temperature,
                 "timeout": timeout,
             }
+            
+            # Pass API key directly (safer than setting environment variables)
+            # LiteLLM will auto-detect the provider from the model name
+            if api_key:
+                kwargs["api_key"] = api_key
             
             # Add JSON mode if supported by the model
             if use_json_mode:
