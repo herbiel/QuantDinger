@@ -23,6 +23,7 @@ class LLMProvider(Enum):
     GOOGLE = "google"
     DEEPSEEK = "deepseek"
     GROK = "grok"
+    LITELLM = "litellm"
 
 
 # Provider configurations
@@ -51,6 +52,11 @@ PROVIDER_CONFIGS = {
         "base_url": "https://api.x.ai/v1",
         "default_model": "grok-beta",
         "fallback_model": "grok-beta",
+    },
+    LLMProvider.LITELLM: {
+        "base_url": "",  # LiteLLM uses provider-specific routing
+        "default_model": "gpt-4o",
+        "fallback_model": "gpt-4o-mini",
     },
 }
 
@@ -91,12 +97,13 @@ class LLMService:
                 pass
         
         # Auto-detect: find any provider with a configured API key
-        # Priority: DeepSeek > Grok > OpenAI > Google > OpenRouter
+        # Priority: DeepSeek > Grok > OpenAI > Google > LiteLLM > OpenRouter
         priority_order = [
             LLMProvider.DEEPSEEK,
             LLMProvider.GROK,
             LLMProvider.OPENAI,
             LLMProvider.GOOGLE,
+            LLMProvider.LITELLM,
             LLMProvider.OPENROUTER,
         ]
         
@@ -118,6 +125,7 @@ class LLMService:
             LLMProvider.GOOGLE: APIKeys.GOOGLE_API_KEY,
             LLMProvider.DEEPSEEK: APIKeys.DEEPSEEK_API_KEY,
             LLMProvider.GROK: APIKeys.GROK_API_KEY,
+            LLMProvider.LITELLM: APIKeys.LITELLM_API_KEY,
         }
         return key_map.get(p, "") or ""
 
@@ -239,6 +247,48 @@ class LLMService:
                     return text
         
         raise ValueError("Gemini API response is missing content")
+
+    def _call_litellm(self, messages: list, model: str, temperature: float,
+                      api_key: str, timeout: int, use_json_mode: bool = True) -> str:
+        """Call LiteLLM unified API."""
+        try:
+            import litellm
+        except ImportError:
+            raise ImportError("litellm package is not installed. Install with: pip install litellm")
+        
+        # Set API key for LiteLLM (it will route to the appropriate provider)
+        # LiteLLM supports environment variables, but we can also pass it directly
+        if api_key:
+            # LiteLLM auto-detects provider from model name (e.g., gpt-4o -> OpenAI)
+            # and uses the appropriate environment variable or passed key
+            os.environ['LITELLM_API_KEY'] = api_key
+        
+        try:
+            # LiteLLM uses OpenAI's message format natively
+            kwargs = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "timeout": timeout,
+            }
+            
+            # Add JSON mode if supported by the model
+            if use_json_mode:
+                kwargs["response_format"] = {"type": "json_object"}
+            
+            response = litellm.completion(**kwargs)
+            
+            if response and response.choices and len(response.choices) > 0:
+                content = response.choices[0].message.content
+                if not content:
+                    raise ValueError(f"Model {model} returned empty content")
+                return content
+            else:
+                raise ValueError("LiteLLM response is missing choices")
+                
+        except Exception as e:
+            logger.error(f"LiteLLM API call failed: {str(e)}")
+            raise
 
     def _normalize_model_for_provider(self, model: str, provider: LLMProvider) -> str:
         """
@@ -373,6 +423,12 @@ class LLMService:
                     return self._call_google_gemini(
                         messages, current_model, temperature,
                         api_key, base_url, timeout
+                    )
+                elif p == LLMProvider.LITELLM:
+                    return self._call_litellm(
+                        messages, current_model, temperature,
+                        api_key, timeout,
+                        use_json_mode=use_json_mode
                     )
                 else:
                     # OpenAI-compatible providers

@@ -103,6 +103,7 @@ CONFIG_SCHEMA = {
                     {'value': 'google', 'label': 'Google Gemini'},
                     {'value': 'deepseek', 'label': 'DeepSeek'},
                     {'value': 'grok', 'label': 'xAI Grok'},
+                    {'value': 'litellm', 'label': 'LiteLLM (Universal gateway for 100+ LLMs)'},
                 ],
                 'description': 'Select your preferred LLM provider'
             },
@@ -226,6 +227,25 @@ CONFIG_SCHEMA = {
                 'default': 'https://api.x.ai/v1',
                 'description': 'xAI Grok API endpoint',
                 'group': 'grok'
+            },
+            # LiteLLM
+            {
+                'key': 'LITELLM_API_KEY',
+                'label': 'LiteLLM API Key',
+                'type': 'password',
+                'required': False,
+                'link': 'https://docs.litellm.ai/docs/',
+                'link_text': 'settings.link.viewDocs',
+                'description': 'API key for LiteLLM unified interface. Can be any provider key (OpenAI, Anthropic, etc.)',
+                'group': 'litellm'
+            },
+            {
+                'key': 'LITELLM_MODEL',
+                'label': 'LiteLLM Model',
+                'type': 'text',
+                'default': 'gpt-4o',
+                'description': 'Model name in LiteLLM format, e.g. gpt-4o, claude-3-5-sonnet-20241022, gemini/gemini-pro',
+                'group': 'litellm'
             },
             # Common settings
             {

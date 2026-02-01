@@ -68,6 +68,16 @@ class MetaAPIKeys(type):
         from app.utils.config_loader import load_addon_config
         val = load_addon_config().get('grok', {}).get('api_key')
         return val if val else ''
+    
+    @property
+    def LITELLM_API_KEY(cls):
+        """LiteLLM API key (can be any provider's key)"""
+        env_val = os.getenv('LITELLM_API_KEY', '').strip()
+        if env_val:
+            return env_val
+        from app.utils.config_loader import load_addon_config
+        val = load_addon_config().get('litellm', {}).get('api_key')
+        return val if val else ''
 
 
 class APIKeys(metaclass=MetaAPIKeys):
