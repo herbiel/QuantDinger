@@ -4,6 +4,24 @@ This document records version updates, new features, bug fixes, and database mig
 
 ---
 
+## V2.1.2 (2026-02-01)
+
+### 🚀 New Features
+
+#### LiteLLM Provider Support
+- **Universal LLM Gateway**: Added LiteLLM as a new LLM provider option, providing unified access to 100+ LLM providers (OpenAI, Anthropic Claude, Google Gemini, Cohere, Hugging Face, and more)
+- **Flexible Model Selection**: Support for any LiteLLM-compatible model format (e.g., `gpt-4o`, `claude-3-5-sonnet-20241022`, `gemini/gemini-pro`)
+- **Secure API Key Handling**: API keys passed directly to calls without environment pollution
+- **Smart Fallback**: Automatic retry without JSON mode for providers that don't support `response_format` parameter
+- **Easy Configuration**: Configure via environment variables, config files, or Settings UI
+- **No Vendor Lock-in**: Switch between different LLM providers without changing code
+
+### 📚 Documentation
+- Added comprehensive LiteLLM configuration examples to `env.example`
+- Updated Settings UI with LiteLLM provider option and configuration fields
+
+---
+
 ## V2.1.1 (2026-01-31)
 
 ### 🚀 New Features
