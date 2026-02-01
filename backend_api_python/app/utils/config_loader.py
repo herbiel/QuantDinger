@@ -90,6 +90,10 @@ def load_addon_config() -> Dict[str, Any]:
         ('GROK_BASE_URL', 'grok.base_url', 'string'),
         ('GROK_MODEL', 'grok.model', 'string'),
         
+        # LiteLLM
+        ('LITELLM_API_KEY', 'litellm.api_key', 'string'),
+        ('LITELLM_MODEL', 'litellm.model', 'string'),
+        
         # LLM Provider Selection
         ('LLM_PROVIDER', 'llm.provider', 'string'),
 
