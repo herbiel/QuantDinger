@@ -250,7 +250,12 @@ class LLMService:
 
     def _call_litellm(self, messages: list, model: str, temperature: float,
                       api_key: str, timeout: int, use_json_mode: bool = True) -> str:
-        """Call LiteLLM unified API."""
+        """
+        Call LiteLLM unified API.
+        
+        Note: JSON mode (response_format) is not universally supported across all 
+        LiteLLM providers. If a provider doesn't support it, we'll retry without it.
+        """
         try:
             import litellm
         except ImportError:
@@ -270,11 +275,21 @@ class LLMService:
             if api_key:
                 kwargs["api_key"] = api_key
             
-            # Add JSON mode if supported by the model
+            # Add JSON mode if requested
+            # Note: Not all providers support this, so we'll catch errors and retry
             if use_json_mode:
                 kwargs["response_format"] = {"type": "json_object"}
             
-            response = litellm.completion(**kwargs)
+            try:
+                response = litellm.completion(**kwargs)
+            except Exception as e:
+                # If JSON mode fails, retry without it
+                if use_json_mode and "response_format" in str(e).lower():
+                    logger.warning(f"Model {model} doesn't support JSON mode, retrying without it")
+                    kwargs.pop("response_format", None)
+                    response = litellm.completion(**kwargs)
+                else:
+                    raise
             
             if response and response.choices and len(response.choices) > 0:
                 content = response.choices[0].message.content
